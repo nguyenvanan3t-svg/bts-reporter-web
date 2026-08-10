@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+
+import { projectService } from "@/services/container";
+
+export async function PUT(
+  request: NextRequest,
+  context: {
+    params: Promise<{
+      id: string;
+    }>;
+  }
+) {
+  try {
+    const { id } = await context.params;
+
+    const body = await request.json();
+
+    const project = await projectService.update(
+      id,
+      body
+    );
+
+    return NextResponse.json(project);
+  } catch (error) {
+        console.error(error);
+
+        return NextResponse.json(
+            {
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "Update failed.",
+            },
+            {
+                status: 400,
+            }
+        );
+    }
+}

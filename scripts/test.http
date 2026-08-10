@@ -1,0 +1,10 @@
+POST http://localhost:3000/api/projects
+Content-Type: application/json
+
+{
+    "code":"DEMO002",
+    "name":"Second Project",
+    "customer":"OpenAI",
+    "year":2026,
+    "description":"Demo"
+}
