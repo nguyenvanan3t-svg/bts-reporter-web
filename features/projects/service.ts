@@ -45,6 +45,12 @@ export class ProjectService {
             throw new Error("Archived projects cannot be modified.");
         }
 
+        const existing = await this.repository.findByCode(dto.code);
+
+        if (existing && existing.id !== id) {
+            throw new Error("PROJECT_CODE_EXISTS");
+        }
+
         return this.repository.update(id, dto);
     }
 

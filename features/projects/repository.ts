@@ -87,6 +87,7 @@ export class ProjectRepository {
         const { data, error } = await supabase
         .from("projects")
         .update({
+            code: dto.code,
             name: dto.name,
             customer: dto.customer,
             year: dto.year,

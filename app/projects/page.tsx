@@ -1,11 +1,7 @@
-import { ProjectTable } from "@/features/projects/components/ProjectTable";
 import { projectService } from "@/services/container";
-import { ProjectForm } from "@/features/projects/components/ProjectForm";
-import ProjectDashboard from "@/features/projects/components/ProjectDashboard";
-import ProjectLeftPanel from "@/features/projects/components/ProjectLeftPanel";
-import ProjectCreateForm from "@/features/projects/components/ProjectCreateForm";
 import ProjectSearch from "@/features/projects/components/ProjectSearch";
 import ProjectDashboardHeader from "@/features/projects/components/ProjectDashboardHeader";
+import ProjectHome from "@/features/projects/components/ProjectHome";
 
 export default async function ProjectsPage() {
   const projects = await projectService.getAll();
@@ -21,14 +17,7 @@ export default async function ProjectsPage() {
 
         <ProjectSearch />
 
-        <ProjectDashboard
-            left={
-                <ProjectLeftPanel
-                    projects={projects}
-                />
-            }
-            right={<ProjectCreateForm />}
-        />
+        <ProjectHome projects={projects} />
     </div>
   );
 }

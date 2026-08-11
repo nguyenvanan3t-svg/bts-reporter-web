@@ -138,6 +138,36 @@ export default function ProjectCard({
                     }}
                 />
             </div>
+
+            {onEdit && (
+                <div
+                    style={{
+                        marginTop: 12,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                    }}
+                >
+                    <button
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onEdit();
+                        }}
+                        style={{
+                            border: "1px solid #CBD5E1",
+                            background: "#FFFFFF",
+                            color: "#334155",
+                            borderRadius: 8,
+                            padding: "6px 12px",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                        }}
+                    >
+                        Edit
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

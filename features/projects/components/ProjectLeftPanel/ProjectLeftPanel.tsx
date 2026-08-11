@@ -1,21 +1,16 @@
 "use client";
-
+import type { Project } from "@/features/projects/types";
 import ProjectCard from "../ProjectCard";
 import { useRouter } from "next/navigation";
 
 type Props = {
-    projects: {
-        id: string;
-        code: string;
-        name: string;
-        customer?: string;
-        year: number;
-        status: string;
-    }[];
+    projects: Project[];
+    onEdit: (project: Project) => void;
 };
 
 export default function ProjectLeftPanel({
     projects,
+    onEdit,
 }: Props) {
     const router = useRouter();
     return (
@@ -65,6 +60,7 @@ export default function ProjectLeftPanel({
                         status={project.status}
                         progress={0}
                         onClick={() => router.push(`/projects/${project.id}`)}
+                        onEdit={() => onEdit(project)}
                     />
                 ))}
             </div>
