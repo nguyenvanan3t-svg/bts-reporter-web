@@ -139,33 +139,58 @@ export default function ProjectCard({
                 />
             </div>
 
-            {onEdit && (
+            {(onEdit || onDelete) && (
                 <div
                     style={{
                         marginTop: 12,
                         display: "flex",
                         justifyContent: "flex-end",
+                        gap: 8,
                     }}
                 >
-                    <button
-                        type="button"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            onEdit();
-                        }}
-                        style={{
-                            border: "1px solid #CBD5E1",
-                            background: "#FFFFFF",
-                            color: "#334155",
-                            borderRadius: 8,
-                            padding: "6px 12px",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                        }}
-                    >
-                        Edit
-                    </button>
+                    {onEdit && (
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onEdit();
+                            }}
+                            style={{
+                                border: "1px solid #CBD5E1",
+                                background: "#FFFFFF",
+                                color: "#334155",
+                                borderRadius: 8,
+                                padding: "6px 12px",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                            }}
+                        >
+                            Edit
+                        </button>
+                    )}
+
+                    {onDelete && (
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete();
+                            }}
+                            style={{
+                                border: "1px solid #FCA5A5",
+                                background: "#FFFFFF",
+                                color: "#DC2626",
+                                borderRadius: 8,
+                                padding: "6px 12px",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                            }}
+                        >
+                            Delete
+                        </button>
+                    )}
                 </div>
             )}
         </div>

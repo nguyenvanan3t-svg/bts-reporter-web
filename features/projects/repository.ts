@@ -121,4 +121,15 @@ export class ProjectRepository {
 
         return data;
     }
+
+    async delete(id: string): Promise<void> {
+        const { error } = await supabase
+            .from("projects")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            throw error;
+        }
+    }
 }

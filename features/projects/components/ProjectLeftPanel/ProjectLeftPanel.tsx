@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 type Props = {
     projects: Project[];
     onEdit: (project: Project) => void;
+    onDelete: (project: Project) => void;
 };
 
 export default function ProjectLeftPanel({
     projects,
     onEdit,
+    onDelete,
 }: Props) {
     const router = useRouter();
     return (
@@ -61,6 +63,7 @@ export default function ProjectLeftPanel({
                         progress={0}
                         onClick={() => router.push(`/projects/${project.id}`)}
                         onEdit={() => onEdit(project)}
+                        onDelete={() => onDelete(project)}
                     />
                 ))}
             </div>

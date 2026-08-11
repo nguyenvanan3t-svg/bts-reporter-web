@@ -1,4 +1,5 @@
 import { ProjectRepository } from "./repository";
+import { hasStationsByProject } from "@/features/stations/repository";
 import type {
     CreateProjectDto,
     UpdateProjectDto,
@@ -56,5 +57,20 @@ export class ProjectService {
 
     async archive(id: string) {
         return this.repository.archive(id);
+    }
+    async delete(id: string) {
+        const project = await this.repository.findById(id);
+
+        if (!project) {
+            throw new Error("Project not found.");
+        }
+
+        const hasStations = await hasStationsByProject(id);
+
+        if (hasStations) {
+            throw new Error("PROJECT_HAS_STATIONS");
+        }
+
+        return this.repository.delete(id);
     }
 }

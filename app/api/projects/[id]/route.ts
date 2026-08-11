@@ -37,3 +37,34 @@ export async function PUT(
         );
     }
 }
+
+export async function DELETE(
+    request: NextRequest,
+    context: {
+        params: Promise<{
+            id: string;
+        }>;
+    }
+) {
+    try {
+        const { id } = await context.params;
+
+        await projectService.delete(id);
+
+        return NextResponse.json({
+            success: true,
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "Delete failed.",
+            },
+            {
+                status: 400,
+            }
+        );
+    }
+}

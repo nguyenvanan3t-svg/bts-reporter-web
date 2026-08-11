@@ -62,6 +62,24 @@ export async function getAllStationsByProject(
     }));
 }
 
+export async function hasStationsByProject(
+    projectId: string,
+): Promise<boolean> {
+    const { count, error } = await supabase
+        .from("stations")
+        .select("id", {
+            count: "exact",
+            head: true,
+        })
+        .eq("project_id", projectId);
+
+    if (error) {
+        throw error;
+    }
+
+    return (count ?? 0) > 0;
+}
+
 export async function createStations(
     stations: CreateStationDto[],
 ): Promise<void> {
