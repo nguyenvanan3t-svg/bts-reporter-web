@@ -6,13 +6,6 @@ type ExcelStationMatch = {
     address: string;
 };
 
-type ExcelSheetInfo = {
-    sheetName: string;
-    codeColumn: number;
-    addressColumn: number;
-    headerRow: number;
-};
-
 const EXCEL_SHEET_NAME = "BTSinfo";
 
 function normalizeText(
@@ -63,17 +56,41 @@ function findColumn(
     return -1;
 }
 
-function findSheetInfo(
-    workbook: XLSX.WorkBook,
-    sheetName: string,
-): ExcelSheetInfo | null {
+export function parseExcelStationFile(
+    buffer: Buffer,
+    fileName: string,
+    stationCodes: string[],
+): ExcelStationMatch[] {
+    const workbook =
+        XLSX.read(buffer, {
+            type: "buffer",
+            cellDates: false,
+        });
+
+    /*
+     * Business Rule:
+     * Chỉ đọc sheet BTSinfo.
+     *
+     * Không xử lý các sheet khác.
+     */
     const worksheet =
-        workbook.Sheets[sheetName];
+        workbook.Sheets[
+            EXCEL_SHEET_NAME
+        ];
 
     if (!worksheet) {
-        return null;
+        return [];
     }
 
+    /*
+     * Chuyển BTSinfo thành rows đúng một lần.
+     *
+     * Trước đây sheet_to_json() được gọi:
+     * 1. lần để tìm header
+     * 2. lần nữa để đọc dữ liệu
+     *
+     * Bây giờ dùng chung một rows.
+     */
     const rows =
         XLSX.utils.sheet_to_json<
             unknown[]
@@ -83,10 +100,18 @@ function findSheetInfo(
             raw: false,
         });
 
-    const maxHeaderRows = Math.min(
-        rows.length,
-        30,
-    );
+    /*
+     * Tìm header trong 30 dòng đầu.
+     */
+    const maxHeaderRows =
+        Math.min(
+            rows.length,
+            30,
+        );
+
+    let codeColumn = -1;
+    let addressColumn = -1;
+    let headerRow = -1;
 
     for (
         let rowIndex = 0;
@@ -96,7 +121,7 @@ function findSheetInfo(
         const row =
             rows[rowIndex] ?? [];
 
-        const codeColumn =
+        const foundCodeColumn =
             findColumn(
                 row,
                 [
@@ -106,7 +131,7 @@ function findSheetInfo(
                 ],
             );
 
-        const addressColumn =
+        const foundAddressColumn =
             findColumn(
                 row,
                 [
@@ -116,61 +141,29 @@ function findSheetInfo(
             );
 
         if (
-            codeColumn !== -1 &&
-            addressColumn !== -1
+            foundCodeColumn !== -1 &&
+            foundAddressColumn !== -1
         ) {
-            return {
-                sheetName,
-                codeColumn,
-                addressColumn,
-                headerRow: rowIndex,
-            };
+            codeColumn =
+                foundCodeColumn;
+
+            addressColumn =
+                foundAddressColumn;
+
+            headerRow =
+                rowIndex;
+
+            break;
         }
     }
 
-    return null;
-}
-
-function findSheet(
-    workbook: XLSX.WorkBook,
-): ExcelSheetInfo | null {
-    return findSheetInfo(
-        workbook,
-        EXCEL_SHEET_NAME,
-    );
-}
-
-export function parseExcelStationFile(
-    buffer: Buffer,
-    fileName: string,
-    stationCodes: string[],
-): ExcelStationMatch[] {
-    const workbook =
-        XLSX.read(buffer, {
-            type: "buffer",
-            cellDates: true,
-        });
-
-    const sheetInfo =
-        findSheet(workbook);
-
-    if (!sheetInfo) {
+    if (
+        codeColumn === -1 ||
+        addressColumn === -1 ||
+        headerRow === -1
+    ) {
         return [];
     }
-
-    const worksheet =
-        workbook.Sheets[
-            sheetInfo.sheetName
-        ];
-
-    const rows =
-        XLSX.utils.sheet_to_json<
-            unknown[]
-        >(worksheet, {
-            header: 1,
-            defval: "",
-            raw: false,
-        });
 
     const stationCodeSet =
         new Set(stationCodes);
@@ -180,7 +173,7 @@ export function parseExcelStationFile(
 
     for (
         let rowIndex =
-            sheetInfo.headerRow + 1;
+            headerRow + 1;
         rowIndex < rows.length;
         rowIndex++
     ) {
@@ -189,9 +182,7 @@ export function parseExcelStationFile(
 
         const stationCode =
             String(
-                row[
-                    sheetInfo.codeColumn
-                ] ?? "",
+                row[codeColumn] ?? "",
             ).trim();
 
         if (
@@ -205,9 +196,7 @@ export function parseExcelStationFile(
 
         const address =
             String(
-                row[
-                    sheetInfo.addressColumn
-                ] ?? "",
+                row[addressColumn] ?? "",
             ).trim();
 
         if (!address) {
