@@ -5,14 +5,14 @@ import { Download, Upload } from "lucide-react";
 
 type Props = {
     title: string;
-
     found: boolean;
-
     fileName?: string;
-
     onDownload?: () => void;
-
     onUpload?: () => void;
+    downloadLoading?: boolean;
+    uploadLoading?: boolean;
+    downloadDisabled?: boolean;
+    uploadDisabled?: boolean;
 };
 
 export function ResourceCard({
@@ -21,6 +21,10 @@ export function ResourceCard({
     fileName,
     onDownload,
     onUpload,
+    downloadLoading = false,
+    uploadLoading = false,
+    downloadDisabled = false,
+    uploadDisabled = false,
 }: Props) {
     return (
         <div
@@ -92,15 +96,33 @@ export function ResourceCard({
                 }}
             >
                 <IconButton
-                    title="Download"
+                    title={
+                        downloadLoading
+                            ? "Downloading..."
+                            : "Download"
+                    }
                     icon={<Download size={18} />}
-                    onClick={onDownload}
+                    onClick={
+                        downloadDisabled ||
+                        downloadLoading
+                            ? undefined
+                            : onDownload
+                    }
                 />
 
                 <IconButton
-                    title="Upload"
+                    title={
+                        uploadLoading
+                            ? "Uploading..."
+                            : "Upload"
+                    }
                     icon={<Upload size={18} />}
-                    onClick={onUpload}
+                    onClick={
+                        uploadDisabled ||
+                        uploadLoading
+                            ? undefined
+                            : onUpload
+                    }
                 />
             </div>
         </div>

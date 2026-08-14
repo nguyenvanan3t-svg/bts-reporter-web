@@ -5,11 +5,9 @@ import StationInformation
 from "@/features/stations/components/StationInformation";
 import {
     getById,
+    loadFtpResources,
 } from "@/features/stations/service";
-import { ResourceCard } from "@/components/Station/ResourceCard";
-import {
-    ResourceStatusTable,
-} from "@/components/Station";
+import StationFtpResources from "@/features/stations/components/StationFtpResources";
 
 type Props = {
     params: Promise<{
@@ -22,39 +20,19 @@ export default async function StationDetailPage({
 }: Props) {
 
     const { id } = await params;
+
     const station = await getById(id);
 
-    const resources = [
-        {
-            resource: "Survey",
-            status: "FOUND" as const,
-            fileName: "survey.json",
-            size: "12 KB",
-            updated: "05/08/2026",
-        },
-        {
-            resource: "Word",
-            status: "MISSING" as const,
-            fileName: "-",
-            size: "-",
-            updated: "-",
-        },
-        {
-            resource: "Visio",
-            status: "FOUND" as const,
-            fileName: "DBN0075-13.vsdx",
-            size: "3.5 MB",
-            updated: "05/08/2026",
-        },
-        {
-            resource: "PDF",
-            status: "FOUND" as const,
-            fileName: "DBN0075-13.pdf",
-            size: "2.2 MB",
-            updated: "05/08/2026",
-        },
-    ];
+    const ftpResources =
+        await loadFtpResources(station.id);
 
+    const stationStatus =
+        ftpResources.survey.status === "FOUND" &&
+        ftpResources.word.status === "FOUND" &&
+        ftpResources.visio.status === "FOUND" &&
+        ftpResources.pdf.status === "FOUND"
+            ? "COMPLETED"
+            : "PENDING";
     return (
 
         <main
@@ -73,12 +51,55 @@ export default async function StationDetailPage({
 
                 <div
                     style={{
-                        color: "#64748b",
-                        fontSize: 14,
+                        color: "#2563eb",
+                        fontSize: 15,
                         marginBottom: 8,
                     }}
                 >
-                    Home &gt; Projects &gt; Station
+                    <a
+                        href="/"
+                        style={{
+                            color: "#2563eb",
+                            textDecoration: "none",
+                        }}
+                    >
+                        Home
+                    </a>
+
+                    {" > "}
+
+                    <a
+                        href="/projects"
+                        style={{
+                            color: "#2563eb",
+                            textDecoration: "none",
+                        }}
+                    >
+                        Projects
+                    </a>
+
+                    {" > "}
+
+                    <a
+                        href={`/projects/${station.projectId}`}
+                        style={{
+                            color: "#2563eb",
+                            textDecoration: "none",
+                        }}
+                    >
+                        {station.project?.name ?? "Project"}
+                    </a>
+
+                    {" > "}
+
+                    <span
+                        style={{
+                            color: "#1e293b",
+                            fontWeight: 600,
+                        }}
+                    >
+                        {station.code}
+                    </span>
                 </div>
 
                 <h1
@@ -129,7 +150,8 @@ export default async function StationDetailPage({
                             projectCode={station.project?.code ?? "-"}
                             province={station.province}
                             address={station.address}
-                            status={station.status}
+                            excelSource={station.excelSource}
+                            status={stationStatus}
                             createdAt={station.createdAt}
                             updatedAt={station.updatedAt}
                         />
@@ -140,77 +162,11 @@ export default async function StationDetailPage({
 
                 right={
 
-                    <>
-
-                        <div
-                            style={{
-                                marginBottom: 12,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    fontSize: 22,
-                                    fontWeight: 700,
-                                    marginBottom: 6,
-                                }}
-                            >
-                                Resource Monitor
-                            </div>
-
-                            <div
-                                style={{
-                                    color: "#64748b",
-                                    fontSize: 14,
-                                }}
-                            >
-                                Current survey and document resources detected on FTP server.
-                            </div>
-                        </div>
-
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(4, 1fr)",
-                                gap: 20,
-                            }}
-                        >
-
-                            <ResourceCard
-                                title="Survey"
-                                found={true}
-                                fileName="survey.json"
-                            />
-
-                            <ResourceCard
-                                title="Word"
-                                found={false}
-                            />
-
-                            <ResourceCard
-                                title="Visio"
-                                found={true}
-                                fileName="DBN0075-13.vsdx"
-                            />
-
-                            <ResourceCard
-                                title="PDF"
-                                found={true}
-                                fileName="DBN0075-13.pdf"
-                            />
-
-                        </div>
-
-                        <div
-                            style={{
-                                height: 24,
-                            }}
-                        />
-
-                        <ResourceStatusTable
-                            items={resources}
-                        />
-
-                    </>
+                    <StationFtpResources
+                        stationId={station.id}
+                        projectId={station.projectId}
+                        stationCode={station.code}
+                    />
 
                 }
 

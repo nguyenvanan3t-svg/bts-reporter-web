@@ -1,6 +1,9 @@
 "use client";
 
 import type { Station } from "@/features/stations/types";
+import type {
+    StationFtpScanResult,
+} from "@/lib/ftp/types";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import {
@@ -12,6 +15,19 @@ import IconButton from "@/components/ui/IconButton";
 
 type Props = {
     stations: Station[];
+
+    ftpResults?: Record<
+        string,
+        StationFtpScanResult
+    >;
+
+    ftpScanned?: boolean;
+
+    ftpScanning?: boolean;
+
+    lastScanAt?: string | null;
+
+    onScanFtp?: () => void;
 
     onDelete?: (
         stationId: string,
@@ -115,6 +131,11 @@ function ResourceBadge({
 
 export default function StationList({
     stations,
+    ftpResults = {},
+    ftpScanned = false,
+    ftpScanning = false,
+    lastScanAt = null,
+    onScanFtp,
     onDelete,
     onRefresh,
     onExport,
@@ -155,12 +176,13 @@ export default function StationList({
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    alignItems: "flex-start",
+                    gap: 24,
                     marginBottom: 12,
+                    flexWrap: "wrap",
                 }}
             >
                 <div>
-
                     <h3
                         style={{
                             margin: 0,
@@ -178,7 +200,6 @@ export default function StationList({
                             marginTop: 8,
                         }}
                     >
-
                         <Button
                             onClick={onImport}
                         >
@@ -194,13 +215,57 @@ export default function StationList({
                         <Button
                             onClick={onRefresh}
                         >
-
                             Refresh
-
                         </Button>
+                    </div>
+                </div>
 
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                    }}
+                >
+                    <div
+                        style={{
+                            textAlign: "right",
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: "#374151",
+                            }}
+                        >
+                            FTP Resources
+                        </div>
+
+                        <div
+                            style={{
+                                marginTop: 3,
+                                fontSize: 12,
+                                color: "#64748B",
+                            }}
+                        >
+                            {lastScanAt
+                                ? `Last scan: ${new Date(
+                                    lastScanAt,
+                                ).toLocaleString("en-GB")}`
+                                : "Not scanned yet"}
+                        </div>
                     </div>
 
+                    <Button
+                        variant="primary"
+                        loading={ftpScanning}
+                        onClick={onScanFtp}
+                    >
+                        {ftpScanning
+                            ? "Scanning..."
+                            : "Scan FTP"}
+                    </Button>
                 </div>
             </div>
 
@@ -224,111 +289,149 @@ export default function StationList({
                     }}
                 />
             </div>
-            <table
+            <div
                 style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
+                    maxHeight: 500,
+                    overflow: "auto",
+                    border: "1px solid #ddd",
+                    borderRadius: 6,
                 }}
             >
-                <thead>
-                    <tr>
-                        <th style={thStyle}>#</th>
-                        <th style={thStyle}>Station</th>
-                        <th style={thStyle}>Province</th>
-                        <th style={thStyle}>Survey</th>
-                        <th style={thStyle}>Word</th>
-                        <th style={thStyle}>Visio</th>
-                        <th style={thStyle}>PDF</th>
-                        <th style={thStyle}>Status</th>
-                        <th style={thStyle}>Action</th>
-                    </tr>
-                </thead>
+                <table
+                    style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th style={thStyle}>#</th>
+                            <th style={thStyle}>Station</th>
+                            <th style={thStyle}>Province</th>
+                            <th style={thStyle}>Survey</th>
+                            <th style={thStyle}>Word</th>
+                            <th style={thStyle}>Visio</th>
+                            <th style={thStyle}>PDF</th>
+                            <th style={thStyle}>Status</th>
+                            <th style={thStyle}>Action</th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    {filteredStations.map((station, index) => (
-                        <tr key={station.id}>
-                            <td style={tdStyle}>
-                                {index + 1}
-                            </td>
+                    <tbody>
+                        {filteredStations.map((station, index) => (
+                            <tr key={station.id}>
+                                <td style={tdStyle}>
+                                    {index + 1}
+                                </td>
 
-                            <td style={tdStyle}>
-                                {station.code}
-                            </td>
+                                <td style={tdStyle}>
+                                    {station.code}
+                                </td>
 
-                            <td style={tdStyle}>
-                                {station.province}
-                            </td>
+                                <td style={tdStyle}>
+                                    {station.province}
+                                </td>
 
-                            <td style={tdStyle}>
-                                <ResourceBadge status="UNKNOWN" />
-                            </td>
-
-                            <td style={tdStyle}>
-                                <ResourceBadge status="UNKNOWN" />
-                            </td>
-
-                            <td style={tdStyle}>
-                                <ResourceBadge status="UNKNOWN" />
-                            </td>
-
-                            <td style={tdStyle}>
-                                <ResourceBadge status="UNKNOWN" />
-                            </td>
-
-                            <td style={tdStyle}>
-
-                                <StatusBadge
-                                    status={station.status}
-                                />
-
-                            </td>
-
-                            <td style={tdStyle}>
-
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        gap: 4,
-                                        alignItems: "center",
-                                    }}
-                                >
-
-                                    <Link
-                                        href={`/stations/${station.id}`}
-                                    >
-
-                                        <IconButton
-                                            title="Station Detail"
-                                            icon={
-                                                <FolderOpen
-                                                    size={16}
-                                                    color="#2563eb"
-                                                />
-                                            }
-                                        />
-
-                                    </Link>
-
-                                    <IconButton
-                                        title="Remove Station"
-                                        icon={
-                                            <Trash2
-                                                size={16}
-                                                color="#dc2626"
-                                            />
+                                <td style={tdStyle}>
+                                    <ResourceBadge
+                                        status={
+                                            ftpResults[station.code]
+                                                ?.survey.status ??
+                                            "UNKNOWN"
                                         }
-                                        onClick={() =>
-                                            onDelete?.(station.id)
+                                    />
+                                </td>
+
+                                <td style={tdStyle}>
+                                    <ResourceBadge
+                                        status={
+                                            ftpResults[station.code]
+                                                ?.word.status ??
+                                            "UNKNOWN"
+                                        }
+                                    />
+                                </td>
+
+                                <td style={tdStyle}>
+                                    <ResourceBadge
+                                        status={
+                                            ftpResults[station.code]
+                                                ?.visio.status ??
+                                            "UNKNOWN"
+                                        }
+                                    />
+                                </td>
+
+                                <td style={tdStyle}>
+                                    <ResourceBadge
+                                        status={
+                                            ftpResults[station.code]
+                                                ?.pdf.status ??
+                                            "UNKNOWN"
+                                        }
+                                    />
+                                </td>
+
+                                <td style={tdStyle}>
+
+                                    <StatusBadge
+                                        status={
+                                            ftpResults[station.code]?.pdf.status ===
+                                            "FOUND"
+                                                ? "COMPLETED"
+                                                : "PENDING"
                                         }
                                     />
 
-                                </div>
+                                </td>
 
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                <td style={tdStyle}>
+
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: 4,
+                                            alignItems: "center",
+                                        }}
+                                    >
+
+                                        <Link
+                                            href={`/stations/${station.id}`}
+                                        >
+
+                                            <IconButton
+                                                title="Station Detail"
+                                                icon={
+                                                    <FolderOpen
+                                                        size={16}
+                                                        color="#2563eb"
+                                                    />
+                                                }
+                                            />
+
+                                        </Link>
+
+                                        <IconButton
+                                            title="Remove Station"
+                                            icon={
+                                                <Trash2
+                                                    size={16}
+                                                    color="#dc2626"
+                                                />
+                                            }
+                                            onClick={() =>
+                                                onDelete?.(station.id)
+                                            }
+                                        />
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
@@ -338,6 +441,9 @@ const thStyle = {
     padding: 8,
     background: "#f5f5f5",
     textAlign: "left" as const,
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 2,
 };
 
 const tdStyle = {

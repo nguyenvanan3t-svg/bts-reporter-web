@@ -5,7 +5,7 @@ import type {
 
 interface SectionProps {
 
-    title: string;
+    title?: string;
 
     children: ReactNode;
 
@@ -39,38 +39,32 @@ export default function Section({
             }}
         >
 
-            <div
-                style={{
-
-                    display: "flex",
-
-                    justifyContent:
-                        "space-between",
-
-                    alignItems: "center",
-
-                    marginBottom: 16,
-
-                }}
-            >
-
-                <h2
+            {(title || actions) && (
+                <div
                     style={{
-
-                        margin: 0,
-
-                        fontSize: 22,
-
-                        color: "#111827",
-
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 16,
                     }}
                 >
-                    {title}
-                </h2>
+                    {title ? (
+                        <h2
+                            style={{
+                                margin: 0,
+                                fontSize: 22,
+                                color: "#111827",
+                            }}
+                        >
+                            {title}
+                        </h2>
+                    ) : (
+                        <div />
+                    )}
 
-                {actions}
-
-            </div>
+                    {actions}
+                </div>
+            )}
 
             {children}
 

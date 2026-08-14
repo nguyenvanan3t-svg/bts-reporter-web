@@ -8,20 +8,14 @@ import {
 
 import ProjectStations
 from "@/features/projects/components/ProjectStations/ProjectStations";
-import Card from "@/components/ui/Card";
 import Section from "@/components/ui/Section";
 import ProjectHeader
 from "@/features/projects/components/ProjectHeader";
-import ProjectLayout from "@/features/projects/components/ProjectLayout";
-import {
-    ProjectInformation,
-} from "@/features/projects/components/ProjectInformation";
 import {
     StationSummary,
 } from "@/features/projects/components/StationSummary";
-import {
-    ProjectMetrics,
-} from "@/features/projects/components/ProjectMetrics";
+import ProjectFtpDashboard
+from "@/features/projects/components/ProjectFtpDashboard";
 
 
 type Props = {
@@ -65,9 +59,7 @@ export default async function ProjectDetailPage(
             }}
         >
 
-            <Section
-                title="Project Detail"
-            >
+            <Section>
 
                 <ProjectHeader
                     project={project}
@@ -79,50 +71,9 @@ export default async function ProjectDetailPage(
                     }}
                 />
 
-                <ProjectMetrics
-                    total={stations.length}
-                    survey={0}
-                    word={0}
-                    visio={0}
-                    pdf={0}
-                />
-
-                <ProjectLayout
-
-                    left={
-
-                        <>
-
-                            <Card>
-
-                                <ProjectInformation
-                                    code={project.code}
-                                    name={project.name}
-                                    customer={project.customer}
-                                    year={project.year}
-                                    status={project.status}
-                                    description={project.description}
-                                />
-
-                            </Card>
-
-                        </>
-
-                    }
-
-                    right={
-
-                        <Card>
-
-                            <ProjectStations
-                                project={project}
-                                stations={stations}
-                            />
-
-                        </Card>
-
-                    }
-
+                <ProjectFtpDashboard
+                    project={project}
+                    stations={stations}
                 />
 
             </Section>

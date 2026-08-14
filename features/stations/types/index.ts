@@ -1,3 +1,11 @@
 export * from "../models";
-export * from "./resource";
+
+export type {
+    ResourceType,
+    StationFtpResourceStatus,
+    StationFtpResourceType,
+    StationFtpResource,
+    StationFtpResources,
+} from "./resource";
+
 export * from "./import";

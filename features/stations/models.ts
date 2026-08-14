@@ -10,6 +10,8 @@ export interface Station {
 
     address: string;
 
+    excelSource: string | null;
+
     status: StationStatus;
 
     createdAt: string;
@@ -48,3 +50,43 @@ export type StationStatus =
     | "WORD"
     | "VISIO"
     | "PDF";
+
+export type StationResourceType =
+    | "survey"
+    | "word"
+    | "visio"
+    | "pdf";
+
+export type StationResourceStatus =
+    | "FOUND"
+    | "MISSING";
+
+export type StationResourceKind =
+    | "file"
+    | "folder";
+
+export interface StationResource {
+    id: string;
+
+    stationId: string;
+
+    resourceType: StationResourceType;
+
+    status: StationResourceStatus;
+
+    type: StationResourceKind | null;
+
+    fileName: string | null;
+
+    path: string | null;
+
+    size: number | null;
+
+    modifiedAt: string | null;
+
+    scannedAt: string;
+
+    createdAt: string;
+
+    updatedAt: string;
+}

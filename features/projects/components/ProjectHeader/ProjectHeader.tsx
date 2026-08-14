@@ -1,9 +1,8 @@
 import type { Project } from "../../types";
+import Link from "next/link";
 
 interface ProjectHeaderProps {
-
     project: Project;
-
 }
 
 export default function ProjectHeader({
@@ -21,20 +20,48 @@ export default function ProjectHeader({
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    fontSize: 13,
-                    color: "#64748b",
-                    marginBottom: 12,
+                    fontSize: 15,
+                    color: "#2563eb",
+                    marginBottom: 14,
                 }}
             >
-                <span>Home</span>
+                <Link
+                    href="/"
+                    className="text-blue-600 transition-colors hover:text-blue-700"
+                >
+                    Home
+                </Link>
 
                 <span>&gt;</span>
 
-                <span>Projects</span>
+                <Link
+                    href="/projects"
+                    className="text-blue-600 transition-colors hover:text-blue-700"
+                >
+                    Projects
+                </Link>
 
                 <span>&gt;</span>
 
-                <span>{project.name}</span>
+                <span
+                    style={{
+                        color: "#1e293b",
+                        fontWeight: 600,
+                    }}
+                >
+                    {project.name}
+                </span>
+            </div>
+
+            <div
+                style={{
+                    marginBottom: 6,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#111827",
+                }}
+            >
+                Project Detail
             </div>
 
             <h1

@@ -1,18 +1,24 @@
 import type {
     Station,
     CreateStationDto,
-    StationResource,
     CompareResult,
+    StationFtpResources,
 } from "./types";
 
 import {
     getStationsByProject,
     getAllStationsByProject,
     getStationById,
+    getStationFtpResources,
+    upsertStationFtpResources,
     searchStationsByCode,
     removeStation,
     createStations,
     updateStation,
+    getStationByProjectAndCode,
+    getProjectFtpResources,
+    getLatestProjectFtpScan,
+    getProjectFtpScanHistory,
 } from "./repository";
 
 export async function loadStations(
@@ -38,6 +44,65 @@ export async function getById(
 ) {
 
     return getStationById(id);
+
+}
+
+export async function getByProjectAndCode(
+    projectId: string,
+    code: string,
+): Promise<Station | null> {
+
+    return getStationByProjectAndCode(
+        projectId,
+        code,
+    );
+}
+
+export async function loadFtpResources(
+    stationId: string,
+): Promise<StationFtpResources> {
+
+    return getStationFtpResources(
+        stationId,
+    );
+
+}
+
+export async function loadProjectFtpResources(
+    projectId: string,
+): Promise<
+    Record<string, StationFtpResources>
+> {
+    return getProjectFtpResources(
+        projectId,
+    );
+}
+
+export async function loadLatestProjectFtpScan(
+    projectId: string,
+) {
+    return getLatestProjectFtpScan(
+        projectId,
+    );
+}
+
+export async function loadProjectFtpScanHistory(
+    projectId: string,
+) {
+    return getProjectFtpScanHistory(
+        projectId,
+    );
+}
+
+export async function saveFtpResources(
+    stationId: string,
+    resources: StationFtpResources,
+): Promise<void> {
+
+    await upsertStationFtpResources(
+        stationId,
+        resources,
+    );
 
 }
 
@@ -148,38 +213,5 @@ export async function removeFromProject(
 ): Promise<void> {
 
     await removeStation(stationId);
-
-}
-
-export async function getResources(
-    stationId: string,
-): Promise<StationResource[]> {
-
-    return [
-
-        {
-            type: "survey",
-            found: true,
-            fileName: "survey.json",
-        },
-
-        {
-            type: "word",
-            found: false,
-        },
-
-        {
-            type: "visio",
-            found: true,
-            fileName: "DBN0075-13.vsdx",
-        },
-
-        {
-            type: "pdf",
-            found: true,
-            fileName: "DBN0075-13.pdf",
-        },
-
-    ];
 
 }

@@ -12,6 +12,8 @@ type StationInformationProps = {
 
     address?: string;
 
+    excelSource?: string | null;
+
     createdAt?: string;
 
     updatedAt?: string;
@@ -30,6 +32,8 @@ export default function StationInformation({
 
     address,
 
+    excelSource,
+
     status,
 
     createdAt,
@@ -46,6 +50,8 @@ export default function StationInformation({
                 style={{
                     marginTop: 0,
                     marginBottom: 20,
+                    color: "#0f172a",
+                    fontWeight: 700,
                 }}
             >
                 Station Overview
@@ -131,6 +137,21 @@ export default function StationInformation({
                         </td>
 
                         <td>{address ?? "-"}</td>
+                    </tr>
+
+                    <tr>
+                        <td
+                            style={{
+                                fontWeight: 600,
+                                color: "#64748b",
+                            }}
+                        >
+                            Excel Source
+                        </td>
+
+                        <td>
+                            {excelSource ?? "-"}
+                        </td>
                     </tr>
 
                     <tr>
