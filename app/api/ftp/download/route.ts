@@ -8,8 +8,8 @@ import {
 } from "@/features/projects/repository";
 
 import {
-    scanStationFtp,
-} from "@/lib/ftp/scanner";
+    loadFtpResources,
+} from "@/features/stations/service";
 
 import {
     getStationByProjectAndCode,
@@ -129,15 +129,13 @@ export async function POST(
             );
         }
 
-        const scanResult =
-            await scanStationFtp(
-                project.name,
+        const resources =
+            await loadFtpResources(
                 station.id,
-                stationCode.trim(),
             );
 
         const ftpResource =
-            scanResult[
+            resources[
                 resource as FtpDownloadResource
             ];
 
