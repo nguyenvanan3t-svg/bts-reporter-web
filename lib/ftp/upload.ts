@@ -67,9 +67,28 @@ export async function uploadFtpResource(
             buffer,
         );
 
+        const connectStart = Date.now();
+
+        const client: Client =
+            await connectFtp();
+
+        console.log(
+            "[FTP Upload] connectFtp:",
+            Date.now() - connectStart,
+            "ms",
+        );
+
+        const uploadStart = Date.now();
+
         await client.uploadFrom(
             tempFile,
             input.ftpPath,
+        );
+
+        console.log(
+            "[FTP Upload] uploadFrom:",
+            Date.now() - uploadStart,
+            "ms",
         );
 
         return {
