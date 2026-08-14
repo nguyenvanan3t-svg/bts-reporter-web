@@ -397,8 +397,6 @@ export default function StationFtpResources({
                     );
                 }
 
-                await scanFtp();
-
             } catch (err) {
 
                 console.error(
@@ -423,7 +421,6 @@ export default function StationFtpResources({
             projectId,
             stationCode,
             uploadResourceType,
-            scanFtp,
         ],
     );
 
