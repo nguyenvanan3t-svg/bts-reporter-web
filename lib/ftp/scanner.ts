@@ -34,6 +34,15 @@ type FtpListItem = {
     modifiedAt?: Date;
 };
 
+function logScanTime(
+    label: string,
+    start: number,
+) {
+    console.log(
+        `[FTP Scan] ${label}: ${Date.now() - start} ms`,
+    );
+}
+
 function normalizeStationFolderName(
     folderName: string,
 ): string {
@@ -512,7 +521,14 @@ export async function scanProjectFtp(
     projectName: string,
     stations: ScanStationInput[],
 ): Promise<ProjectFtpScanResult> {
+    const scanStart = Date.now();
+
     const client = await connectFtp();
+
+    logScanTime(
+        "connectFtp",
+        scanStart,
+    );
 
     try {
         const projectPath =
@@ -533,15 +549,29 @@ export async function scanProjectFtp(
             );
         }
 
+        const projectListStart = Date.now();
+
         const projectItems =
             await client.list(
                 projectPath,
             );
 
+        logScanTime(
+            "project LIST",
+            projectListStart,
+        );
+
+        const surveyStart = Date.now();
+
         await scanSurvey(
             client,
             projectPath,
             stationResults,
+        );
+
+        logScanTime(
+            "survey scan",
+            surveyStart,
         );
 
         const hoSoPath =
@@ -556,11 +586,20 @@ export async function scanProjectFtp(
             );
 
         if (hasHoSo) {
+            const documentsStart = Date.now();
+
             await scanDocuments(
                 client,
                 hoSoPath,
                 stationResults,
             );
+
+            logScanTime(
+                "document scan",
+                documentsStart,
+            );
+
+            const excelStart = Date.now();
 
             const excelResults =
                 await scanExcelSources(
@@ -572,10 +611,17 @@ export async function scanProjectFtp(
                     ),
                 );
 
+            logScanTime(
+                "Excel scan",
+                excelStart,
+            );
+
             console.log(
                 "[FTP Excel Scan]",
                 excelResults,
             );
+
+            const databaseStart = Date.now();
 
             for (const excelResult of excelResults) {
                 const station =
@@ -595,6 +641,10 @@ export async function scanProjectFtp(
                     excelResult.fileName,
                 );
             }
+            logScanTime(
+                "database update",
+                databaseStart,
+            );
         }
 
         for (const station of stations) {
@@ -626,6 +676,10 @@ export async function scanProjectFtp(
                     stationResults.values(),
                 ),
         };
+    logScanTime(
+        "TOTAL",
+        scanStart,
+    );
     } finally {
         client.close();
     }
