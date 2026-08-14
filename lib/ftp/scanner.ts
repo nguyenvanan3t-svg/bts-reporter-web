@@ -34,15 +34,6 @@ type FtpListItem = {
     modifiedAt?: Date;
 };
 
-function logScanTime(
-    label: string,
-    start: number,
-) {
-    console.log(
-        `[FTP Scan] ${label}: ${Date.now() - start} ms`,
-    );
-}
-
 function normalizeStationFolderName(
     folderName: string,
 ): string {
@@ -525,11 +516,6 @@ export async function scanProjectFtp(
 
     const client = await connectFtp();
 
-    logScanTime(
-        "connectFtp",
-        scanStart,
-    );
-
     try {
         const projectPath =
             `/Projects/${projectName}`;
@@ -556,22 +542,12 @@ export async function scanProjectFtp(
                 projectPath,
             );
 
-        logScanTime(
-            "project LIST",
-            projectListStart,
-        );
-
         const surveyStart = Date.now();
 
         await scanSurvey(
             client,
             projectPath,
             stationResults,
-        );
-
-        logScanTime(
-            "survey scan",
-            surveyStart,
         );
 
         const hoSoPath =
@@ -594,11 +570,6 @@ export async function scanProjectFtp(
                 stationResults,
             );
 
-            logScanTime(
-                "document scan",
-                documentsStart,
-            );
-
             const excelStart = Date.now();
 
             const excelResults =
@@ -610,16 +581,6 @@ export async function scanProjectFtp(
                             station.code,
                     ),
                 );
-
-            logScanTime(
-                "Excel scan",
-                excelStart,
-            );
-
-            console.log(
-                "[FTP Excel Scan]",
-                excelResults,
-            );
 
             const databaseStart = Date.now();
 
@@ -641,10 +602,6 @@ export async function scanProjectFtp(
                     excelResult.fileName,
                 );
             }
-            logScanTime(
-                "database update",
-                databaseStart,
-            );
         }
 
         for (const station of stations) {
@@ -676,10 +633,6 @@ export async function scanProjectFtp(
                     stationResults.values(),
                 ),
         };
-    logScanTime(
-        "TOTAL",
-        scanStart,
-    );
     } finally {
         client.close();
     }
