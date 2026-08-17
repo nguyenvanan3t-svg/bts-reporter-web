@@ -328,17 +328,21 @@ async function scanDocuments(
     client: Awaited<ReturnType<typeof connectFtp>>,
     hoSoPath: string,
     stationResults: Map<string, StationFtpScanResult>,
-) {
+): Promise<string[]> {
     const stationCodes =
         Array.from(
             stationResults.keys(),
         );
 
+    const excelFiles: string[] = [];
+
     async function scanFolder(
         folderPath: string,
     ): Promise<void> {
         const items =
-            await client.list(folderPath);
+            await client.list(
+                folderPath,
+            );
 
         for (const item of items) {
             const itemPath =
@@ -348,7 +352,10 @@ async function scanDocuments(
                 item.type ===
                 FileType.Directory
             ) {
-                await scanFolder(itemPath);
+                await scanFolder(
+                    itemPath,
+                );
+
                 continue;
             }
 
@@ -359,7 +366,23 @@ async function scanDocuments(
                 continue;
             }
 
-            for (const stationCode of stationCodes) {
+            const lowerName =
+                item.name.toLowerCase();
+
+            if (
+                lowerName.endsWith(".xlsx") ||
+                lowerName.endsWith(".xlsm")
+            ) {
+                excelFiles.push(
+                    itemPath,
+                );
+
+                continue;
+            }
+
+            for (
+                const stationCode of stationCodes
+            ) {
                 const resourceType =
                     getResourceType(
                         item.name,
@@ -386,71 +409,19 @@ async function scanDocuments(
         }
     }
 
-    await scanFolder(hoSoPath);
-}
+    await scanFolder(
+        hoSoPath,
+    );
 
-async function findExcelFiles(
-    client: Awaited<ReturnType<typeof connectFtp>>,
-    rootPath: string,
-): Promise<string[]> {
-    const results: string[] = [];
-
-    async function walk(
-        currentPath: string,
-    ): Promise<void> {
-        const items =
-            await client.list(
-                currentPath,
-            );
-
-        for (const item of items) {
-            const itemPath =
-                `${currentPath}/${item.name}`;
-
-            if (
-                item.type ===
-                FileType.Directory
-            ) {
-                await walk(itemPath);
-                continue;
-            }
-
-            if (
-                item.type !==
-                FileType.File
-            ) {
-                continue;
-            }
-
-            const lowerName =
-                item.name.toLowerCase();
-
-            if (
-                lowerName.endsWith(".xlsx") ||
-                lowerName.endsWith(".xlsm")
-            ) {
-                results.push(itemPath);
-            }
-        }
-    }
-
-    await walk(rootPath);
-
-    return results;
+    return excelFiles;
 }
 
 async function scanExcelSources(
     client: Awaited<ReturnType<typeof connectFtp>>,
-    hoSoPath: string,
+    excelFiles: string[],
     stationCodes: string[],
 ): Promise<ExcelStationScanResult[]> {
     const findExcelStart = Date.now();
-
-    const excelFiles =
-        await findExcelFiles(
-            client,
-            hoSoPath,
-        );
 
     console.log(
         "[FTP Excel Scan] findExcelFiles:",
@@ -593,18 +564,19 @@ export async function scanProjectFtp(
         if (hasHoSo) {
             const documentsStart = Date.now();
 
-            await scanDocuments(
-                client,
-                hoSoPath,
-                stationResults,
-            );
+            const excelFiles =
+                await scanDocuments(
+                    client,
+                    hoSoPath,
+                    stationResults,
+                );
 
             const excelStart = Date.now();
 
             const excelResults =
                 await scanExcelSources(
                     client,
-                    hoSoPath,
+                    excelFiles,
                     stations.map(
                         (station) =>
                             station.code,
