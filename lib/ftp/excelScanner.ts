@@ -67,6 +67,7 @@ export function parseExcelStationFile(
         XLSX.read(buffer, {
             type: "buffer",
             cellDates: false,
+            sheets: "BTSinfo",
         });
 
     console.log(
