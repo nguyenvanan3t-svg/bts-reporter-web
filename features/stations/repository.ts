@@ -563,6 +563,7 @@ export async function upsertStationFtpResources(
 }
 
 const FTP_RESOURCE_BATCH_SIZE = 200;
+const FTP_RESOURCE_CONCURRENCY = 4;
 
 export async function upsertStationsFtpResources(
     items: Array<{
@@ -575,145 +576,251 @@ export async function upsertStationsFtpResources(
         return;
     }
 
+    const batches: Array<
+        Array<{
+            stationId: string;
+            resources: StationFtpResources;
+        }>
+    > = [];
+
     for (
         let start = 0;
         start < items.length;
         start += FTP_RESOURCE_BATCH_SIZE
     ) {
-        const batch =
+        batches.push(
             items.slice(
                 start,
                 start +
                     FTP_RESOURCE_BATCH_SIZE,
+            ),
+        );
+    }
+
+    for (
+        let start = 0;
+        start < batches.length;
+        start += FTP_RESOURCE_CONCURRENCY
+    ) {
+        const concurrentBatches =
+            batches.slice(
+                start,
+                start +
+                    FTP_RESOURCE_CONCURRENCY,
             );
 
-        const scannedAt =
-            new Date().toISOString();
+        await Promise.all(
+            concurrentBatches.map(
+                async (
+                    batch,
+                    batchIndex,
+                ) => {
 
-        const rows = batch.flatMap(
-            (item) => [
-                {
-                    station_id:
-                        item.stationId,
-                    resource_type:
-                        "survey",
-                    status:
-                        item.resources.survey.status,
-                    type:
-                        item.resources.survey.type ??
-                        null,
-                    file_name:
-                        item.resources.survey.fileName ??
-                        null,
-                    path:
-                        item.resources.survey.path ??
-                        null,
-                    size:
-                        item.resources.survey.size ??
-                        null,
-                    modified_at:
-                        item.resources.survey.modifiedAt ??
-                        null,
-                    scanned_at:
-                        scannedAt,
-                    updated_at:
-                        scannedAt,
+                    const scannedAt =
+                        new Date().toISOString();
+
+                    const rows =
+                        batch.flatMap(
+                            (item) => [
+                                {
+                                    station_id:
+                                        item.stationId,
+                                    resource_type:
+                                        "survey",
+                                    status:
+                                        item.resources
+                                            .survey
+                                            .status,
+                                    type:
+                                        item.resources
+                                            .survey
+                                            .type ??
+                                        null,
+                                    file_name:
+                                        item.resources
+                                            .survey
+                                            .fileName ??
+                                        null,
+                                    path:
+                                        item.resources
+                                            .survey
+                                            .path ??
+                                        null,
+                                    size:
+                                        item.resources
+                                            .survey
+                                            .size ??
+                                        null,
+                                    modified_at:
+                                        item.resources
+                                            .survey
+                                            .modifiedAt ??
+                                        null,
+                                    scanned_at:
+                                        scannedAt,
+                                    updated_at:
+                                        scannedAt,
+                                },
+
+                                {
+                                    station_id:
+                                        item.stationId,
+                                    resource_type:
+                                        "word",
+                                    status:
+                                        item.resources
+                                            .word
+                                            .status,
+                                    type:
+                                        item.resources
+                                            .word
+                                            .type ??
+                                        null,
+                                    file_name:
+                                        item.resources
+                                            .word
+                                            .fileName ??
+                                        null,
+                                    path:
+                                        item.resources
+                                            .word
+                                            .path ??
+                                        null,
+                                    size:
+                                        item.resources
+                                            .word
+                                            .size ??
+                                        null,
+                                    modified_at:
+                                        item.resources
+                                            .word
+                                            .modifiedAt ??
+                                        null,
+                                    scanned_at:
+                                        scannedAt,
+                                    updated_at:
+                                        scannedAt,
+                                },
+
+                                {
+                                    station_id:
+                                        item.stationId,
+                                    resource_type:
+                                        "visio",
+                                    status:
+                                        item.resources
+                                            .visio
+                                            .status,
+                                    type:
+                                        item.resources
+                                            .visio
+                                            .type ??
+                                        null,
+                                    file_name:
+                                        item.resources
+                                            .visio
+                                            .fileName ??
+                                        null,
+                                    path:
+                                        item.resources
+                                            .visio
+                                            .path ??
+                                        null,
+                                    size:
+                                        item.resources
+                                            .visio
+                                            .size ??
+                                        null,
+                                    modified_at:
+                                        item.resources
+                                            .visio
+                                            .modifiedAt ??
+                                        null,
+                                    scanned_at:
+                                        scannedAt,
+                                    updated_at:
+                                        scannedAt,
+                                },
+
+                                {
+                                    station_id:
+                                        item.stationId,
+                                    resource_type:
+                                        "pdf",
+                                    status:
+                                        item.resources
+                                            .pdf
+                                            .status,
+                                    type:
+                                        item.resources
+                                            .pdf
+                                            .type ??
+                                        null,
+                                    file_name:
+                                        item.resources
+                                            .pdf
+                                            .fileName ??
+                                        null,
+                                    path:
+                                        item.resources
+                                            .pdf
+                                            .path ??
+                                        null,
+                                    size:
+                                        item.resources
+                                            .pdf
+                                            .size ??
+                                        null,
+                                    modified_at:
+                                        item.resources
+                                            .pdf
+                                            .modifiedAt ??
+                                        null,
+                                    scanned_at:
+                                        scannedAt,
+                                    updated_at:
+                                        scannedAt,
+                                },
+                            ],
+                        );
+
+                    const batchStart =
+                        Date.now();
+
+                    const { error } =
+                        await supabase
+                            .from(
+                                "station_resources",
+                            )
+                            .upsert(
+                                rows,
+                                {
+                                    onConflict:
+                                        "station_id,resource_type",
+                                },
+                            );
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    console.log(
+                        "[FTP Resource DB] batch:",
+                        start +
+                            batchIndex +
+                            1,
+                        "/",
+                        batches.length,
+                        "stations:",
+                        batch.length,
+                        "time:",
+                        Date.now() -
+                            batchStart,
+                        "ms",
+                    );
                 },
-                {
-                    station_id:
-                        item.stationId,
-                    resource_type:
-                        "word",
-                    status:
-                        item.resources.word.status,
-                    type:
-                        item.resources.word.type ??
-                        null,
-                    file_name:
-                        item.resources.word.fileName ??
-                        null,
-                    path:
-                        item.resources.word.path ??
-                        null,
-                    size:
-                        item.resources.word.size ??
-                        null,
-                    modified_at:
-                        item.resources.word.modifiedAt ??
-                        null,
-                    scanned_at:
-                        scannedAt,
-                    updated_at:
-                        scannedAt,
-                },
-                {
-                    station_id:
-                        item.stationId,
-                    resource_type:
-                        "visio",
-                    status:
-                        item.resources.visio.status,
-                    type:
-                        item.resources.visio.type ??
-                        null,
-                    file_name:
-                        item.resources.visio.fileName ??
-                        null,
-                    path:
-                        item.resources.visio.path ??
-                        null,
-                    size:
-                        item.resources.visio.size ??
-                        null,
-                    modified_at:
-                        item.resources.visio.modifiedAt ??
-                        null,
-                    scanned_at:
-                        scannedAt,
-                    updated_at:
-                        scannedAt,
-                },
-                {
-                    station_id:
-                        item.stationId,
-                    resource_type:
-                        "pdf",
-                    status:
-                        item.resources.pdf.status,
-                    type:
-                        item.resources.pdf.type ??
-                        null,
-                    file_name:
-                        item.resources.pdf.fileName ??
-                        null,
-                    path:
-                        item.resources.pdf.path ??
-                        null,
-                    size:
-                        item.resources.pdf.size ??
-                        null,
-                    modified_at:
-                        item.resources.pdf.modifiedAt ??
-                        null,
-                    scanned_at:
-                        scannedAt,
-                    updated_at:
-                        scannedAt,
-                },
-            ],
+            ),
         );
-
-        const { error } =
-            await supabase
-                .from("station_resources")
-                .upsert(rows, {
-                    onConflict:
-                        "station_id,resource_type",
-                });
-
-        if (error) {
-            throw error;
-        }
     }
 }
 
