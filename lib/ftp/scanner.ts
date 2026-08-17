@@ -3,7 +3,7 @@ import { Writable } from "node:stream";
 
 import { connectFtp } from "@/lib/ftp/client";
 import {
-    upsertStationFtpResources,
+    upsertStationsFtpResources,
     updateStationFromExcel,
 } from "@/features/stations/repository";
 
@@ -621,26 +621,40 @@ export async function scanProjectFtp(
             }
         }
 
-        for (const station of stations) {
-            const result =
-                stationResults.get(
-                    station.code,
-                );
+        const ftpResourceUpdates =
+            stations.flatMap(
+                (station) => {
+                    const result =
+                        stationResults.get(
+                            station.code,
+                        );
 
-            if (!result) {
-                continue;
-            }
+                    if (!result) {
+                        return [];
+                    }
 
-            await upsertStationFtpResources(
-                station.id,
-                {
-                    survey: result.survey,
-                    word: result.word,
-                    visio: result.visio,
-                    pdf: result.pdf,
+                    return [
+                        {
+                            stationId:
+                                station.id,
+                            resources: {
+                                survey:
+                                    result.survey,
+                                word:
+                                    result.word,
+                                visio:
+                                    result.visio,
+                                pdf:
+                                    result.pdf,
+                            },
+                        },
+                    ];
                 },
             );
-        }
+
+        await upsertStationsFtpResources(
+            ftpResourceUpdates,
+        );
 
         return {
             projectName,

@@ -369,13 +369,40 @@ export async function getProjectFtpResources(
             (station) => station.id,
         );
 
-    const { data, error } = await supabase
-        .from("station_resources")
-        .select("*")
-        .in("station_id", stationIds);
+    const RESOURCE_QUERY_BATCH_SIZE = 500;
 
-    if (error) {
-        throw error;
+    const allResourceRows: any[] = [];
+
+    for (
+        let start = 0;
+        start < stationIds.length;
+        start += RESOURCE_QUERY_BATCH_SIZE
+    ) {
+        const batchIds =
+            stationIds.slice(
+                start,
+                start +
+                    RESOURCE_QUERY_BATCH_SIZE,
+            );
+
+        const {
+            data,
+            error,
+        } = await supabase
+            .from("station_resources")
+            .select("*")
+            .in(
+                "station_id",
+                batchIds,
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        allResourceRows.push(
+            ...(data ?? []),
+        );
     }
 
     const resourcesByStation:
@@ -399,7 +426,7 @@ export async function getProjectFtpResources(
         };
     }
 
-    for (const item of data ?? []) {
+    for (const item of allResourceRows) {
 
         const stationResources =
             resourcesByStation[
@@ -532,6 +559,161 @@ export async function upsertStationFtpResources(
 
     if (error) {
         throw error;
+    }
+}
+
+const FTP_RESOURCE_BATCH_SIZE = 200;
+
+export async function upsertStationsFtpResources(
+    items: Array<{
+        stationId: string;
+        resources: StationFtpResources;
+    }>,
+): Promise<void> {
+
+    if (items.length === 0) {
+        return;
+    }
+
+    for (
+        let start = 0;
+        start < items.length;
+        start += FTP_RESOURCE_BATCH_SIZE
+    ) {
+        const batch =
+            items.slice(
+                start,
+                start +
+                    FTP_RESOURCE_BATCH_SIZE,
+            );
+
+        const scannedAt =
+            new Date().toISOString();
+
+        const rows = batch.flatMap(
+            (item) => [
+                {
+                    station_id:
+                        item.stationId,
+                    resource_type:
+                        "survey",
+                    status:
+                        item.resources.survey.status,
+                    type:
+                        item.resources.survey.type ??
+                        null,
+                    file_name:
+                        item.resources.survey.fileName ??
+                        null,
+                    path:
+                        item.resources.survey.path ??
+                        null,
+                    size:
+                        item.resources.survey.size ??
+                        null,
+                    modified_at:
+                        item.resources.survey.modifiedAt ??
+                        null,
+                    scanned_at:
+                        scannedAt,
+                    updated_at:
+                        scannedAt,
+                },
+                {
+                    station_id:
+                        item.stationId,
+                    resource_type:
+                        "word",
+                    status:
+                        item.resources.word.status,
+                    type:
+                        item.resources.word.type ??
+                        null,
+                    file_name:
+                        item.resources.word.fileName ??
+                        null,
+                    path:
+                        item.resources.word.path ??
+                        null,
+                    size:
+                        item.resources.word.size ??
+                        null,
+                    modified_at:
+                        item.resources.word.modifiedAt ??
+                        null,
+                    scanned_at:
+                        scannedAt,
+                    updated_at:
+                        scannedAt,
+                },
+                {
+                    station_id:
+                        item.stationId,
+                    resource_type:
+                        "visio",
+                    status:
+                        item.resources.visio.status,
+                    type:
+                        item.resources.visio.type ??
+                        null,
+                    file_name:
+                        item.resources.visio.fileName ??
+                        null,
+                    path:
+                        item.resources.visio.path ??
+                        null,
+                    size:
+                        item.resources.visio.size ??
+                        null,
+                    modified_at:
+                        item.resources.visio.modifiedAt ??
+                        null,
+                    scanned_at:
+                        scannedAt,
+                    updated_at:
+                        scannedAt,
+                },
+                {
+                    station_id:
+                        item.stationId,
+                    resource_type:
+                        "pdf",
+                    status:
+                        item.resources.pdf.status,
+                    type:
+                        item.resources.pdf.type ??
+                        null,
+                    file_name:
+                        item.resources.pdf.fileName ??
+                        null,
+                    path:
+                        item.resources.pdf.path ??
+                        null,
+                    size:
+                        item.resources.pdf.size ??
+                        null,
+                    modified_at:
+                        item.resources.pdf.modifiedAt ??
+                        null,
+                    scanned_at:
+                        scannedAt,
+                    updated_at:
+                        scannedAt,
+                },
+            ],
+        );
+
+        const { error } =
+            await supabase
+                .from("station_resources")
+                .upsert(rows, {
+                    onConflict:
+                        "station_id,resource_type",
+                });
+
+        if (error) {
+            throw error;
+        }
     }
 }
 
