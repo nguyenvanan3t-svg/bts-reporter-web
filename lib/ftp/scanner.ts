@@ -417,7 +417,7 @@ async function scanDocuments(
 }
 
 async function scanExcelSources(
-    client: Awaited<ReturnType<typeof connectFtp>>,
+    _client: Awaited<ReturnType<typeof connectFtp>>,
     excelFiles: string[],
     stationCodes: string[],
 ): Promise<ExcelStationScanResult[]> {
@@ -433,77 +433,124 @@ async function scanExcelSources(
     const results: ExcelStationScanResult[] =
         [];
 
-    for (
-        const filePath of excelFiles
-    ) {
-        const fileName =
-            filePath
-                .split("/")
-                .pop() ?? filePath;
+    const concurrency = 4;
+
+    let nextIndex = 0;
+
+    async function worker(): Promise<void> {
+        const client =
+            await connectFtp();
 
         try {
-            const chunks: Buffer[] = [];
+            while (true) {
+                const index =
+                    nextIndex++;
 
-            const writable =
-                new Writable({
-                    write(
-                        chunk,
-                        _encoding,
-                        callback,
-                    ) {
-                        chunks.push(
-                            Buffer.from(chunk),
+                if (
+                    index >=
+                    excelFiles.length
+                ) {
+                    return;
+                }
+
+                const filePath =
+                    excelFiles[index];
+
+                const fileName =
+                    filePath
+                        .split("/")
+                        .pop() ??
+                    filePath;
+
+                try {
+                    const chunks: Buffer[] =
+                        [];
+
+                    const writable =
+                        new Writable({
+                            write(
+                                chunk,
+                                _encoding,
+                                callback,
+                            ) {
+                                chunks.push(
+                                    Buffer.from(
+                                        chunk,
+                                    ),
+                                );
+
+                                callback();
+                            },
+                        });
+
+                    const downloadStart =
+                        Date.now();
+
+                    await client.downloadTo(
+                        writable,
+                        filePath,
+                    );
+
+                    console.log(
+                        "[FTP Excel Scan] download:",
+                        Date.now() -
+                            downloadStart,
+                        "ms",
+                        fileName,
+                    );
+
+                    const buffer =
+                        Buffer.concat(
+                            chunks,
                         );
 
-                        callback();
-                    },
-                });
+                    const parseStart =
+                        Date.now();
 
-            const downloadStart =
-                Date.now();
+                    const matches =
+                        parseExcelStationFile(
+                            buffer,
+                            fileName,
+                            stationCodes,
+                        );
 
-            await client.downloadTo(
-                writable,
-                filePath,
-            );
+                    console.log(
+                        "[FTP Excel Scan] parse BTSinfo:",
+                        Date.now() -
+                            parseStart,
+                        "ms",
+                        fileName,
+                    );
 
-            console.log(
-                "[FTP Excel Scan] download:",
-                Date.now() - downloadStart,
-                "ms",
-                fileName,
-            );
-
-            const buffer =
-                Buffer.concat(chunks);
-
-            const parseStart =
-                Date.now();
-
-            const matches =
-                parseExcelStationFile(
-                    buffer,
-                    fileName,
-                    stationCodes,
-                );
-
-            console.log(
-                "[FTP Excel Scan] parse BTSinfo:",
-                Date.now() - parseStart,
-                "ms",
-                fileName,
-            );
-
-            results.push(
-                ...matches,
-            );
-        } catch (error) {
-            console.error(
-                `Failed to scan Excel file ${filePath}:`,
-                error,
-            );
+                    results.push(
+                        ...matches,
+                    );
+                } catch (error) {
+                    console.error(
+                        `Failed to scan Excel file ${filePath}:`,
+                        error,
+                    );
+                }
+            }
+        } finally {
+            client.close();
         }
     }
+
+    const workers =
+        Array.from(
+            {
+                length: Math.min(
+                    concurrency,
+                    excelFiles.length,
+                ),
+            },
+            () => worker(),
+        );
+
+    await Promise.all(
+        workers,
+    );
 
     return results;
 }
