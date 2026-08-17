@@ -156,12 +156,9 @@ function getResourceType(
 async function scanSurvey(
     client: Awaited<ReturnType<typeof connectFtp>>,
     projectPath: string,
+    projectItems: FtpListItem[],
     stationResults: Map<string, StationFtpScanResult>,
 ) {
-    const projectItems = await client.list(
-        projectPath,
-    );
-
     const provinceFolders = projectItems.filter(
         (item) =>
             item.type === FileType.Directory &&
@@ -530,7 +527,15 @@ export async function scanProjectFtp(
 ): Promise<ProjectFtpScanResult> {
     const scanStart = Date.now();
 
+    const connectStart = Date.now();
+
     const client = await connectFtp();
+
+    console.log(
+        "[FTP Scan] connect:",
+        Date.now() - connectStart,
+        "ms",
+    );
 
     try {
         const projectPath =
@@ -558,12 +563,26 @@ export async function scanProjectFtp(
                 projectPath,
             );
 
+        console.log(
+            "[FTP Scan] list project:",
+            Date.now() - projectListStart,
+            "ms",
+            `(${projectItems.length} items)`,
+        );
+
         const surveyStart = Date.now();
 
         await scanSurvey(
             client,
             projectPath,
+            projectItems,
             stationResults,
+        );
+
+        console.log(
+            "[FTP Scan] survey:",
+            Date.now() - surveyStart,
+            "ms",
         );
 
         const hoSoPath =
