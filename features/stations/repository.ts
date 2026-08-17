@@ -9,22 +9,75 @@ import type {
 
 const TABLE = "stations";
 
+const STATION_PAGE_SIZE = 1000;
+
+async function fetchStationsByProject(
+    projectId: string,
+    includeRemoved: boolean,
+): Promise<any[]> {
+
+    const allRows: any[] = [];
+
+    let from = 0;
+
+    while (true) {
+
+        let query = supabase
+            .from("stations")
+            .select("*")
+            .eq("project_id", projectId)
+            .order("code")
+            .range(
+                from,
+                from + STATION_PAGE_SIZE - 1,
+            );
+
+        if (!includeRemoved) {
+            query = query.eq(
+                "is_removed",
+                false,
+            );
+        }
+
+        const {
+            data,
+            error,
+        } = await query;
+
+        if (error) {
+            throw error;
+        }
+
+        const rows = data ?? [];
+
+        allRows.push(
+            ...rows,
+        );
+
+        if (
+            rows.length <
+            STATION_PAGE_SIZE
+        ) {
+            break;
+        }
+
+        from += STATION_PAGE_SIZE;
+    }
+
+    return allRows;
+}
+
 export async function getStationsByProject(
     projectId: string,
 ): Promise<Station[]> {
 
-    const { data, error } = await supabase
-        .from("stations")
-        .select("*")
-        .eq("project_id", projectId)
-        .eq("is_removed", false)
-        .order("code");
+    const data =
+        await fetchStationsByProject(
+            projectId,
+            false,
+        );
 
-    if (error) {
-        throw error;
-    }
-
-    return (data ?? []).map((item) => ({
+    return data.map((item) => ({
         id: item.id,
         projectId: item.project_id,
         code: item.code,
@@ -42,17 +95,13 @@ export async function getAllStationsByProject(
     projectId: string,
 ): Promise<Station[]> {
 
-    const { data, error } = await supabase
-        .from("stations")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("code");
+    const data =
+        await fetchStationsByProject(
+            projectId,
+            true,
+        );
 
-    if (error) {
-        throw error;
-    }
-
-    return (data ?? []).map((item) => ({
+    return data.map((item) => ({
         id: item.id,
         projectId: item.project_id,
         code: item.code,
