@@ -8,6 +8,7 @@ import type {
 import {
     getStationsByProject,
     getAllStationsByProject,
+    getStationScanInputsByProject,
     getStationById,
     getStationFtpResources,
     upsertStationFtpResources,
@@ -26,6 +27,21 @@ export async function loadStations(
 ): Promise<Station[]> {
 
     return getStationsByProject(projectId);
+
+}
+
+export async function loadStationScanInputs(
+    projectId: string,
+): Promise<
+    Array<{
+        id: string;
+        code: string;
+    }>
+> {
+
+    return getStationScanInputsByProject(
+        projectId,
+    );
 
 }
 

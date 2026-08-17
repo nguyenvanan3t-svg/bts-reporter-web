@@ -91,6 +91,71 @@ export async function getStationsByProject(
     }));
 }
 
+export async function getStationScanInputsByProject(
+    projectId: string,
+): Promise<
+    Array<{
+        id: string;
+        code: string;
+    }>
+> {
+
+    const allRows: Array<{
+        id: string;
+        code: string;
+    }> = [];
+
+    let from = 0;
+
+    while (true) {
+
+        const {
+            data,
+            error,
+        } = await supabase
+            .from("stations")
+            .select("id, code")
+            .eq(
+                "project_id",
+                projectId,
+            )
+            .eq(
+                "is_removed",
+                false,
+            )
+            .order("code")
+            .range(
+                from,
+                from +
+                    STATION_PAGE_SIZE -
+                    1,
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        const rows =
+            data ?? [];
+
+        allRows.push(
+            ...rows,
+        );
+
+        if (
+            rows.length <
+            STATION_PAGE_SIZE
+        ) {
+            break;
+        }
+
+        from +=
+            STATION_PAGE_SIZE;
+    }
+
+    return allRows;
+}
+
 export async function getAllStationsByProject(
     projectId: string,
 ): Promise<Station[]> {

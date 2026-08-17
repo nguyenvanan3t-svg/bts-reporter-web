@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { ProjectRepository } from "@/features/projects/repository";
-import { loadStations } from "@/features/stations/service";
+import {
+    loadStationScanInputs,
+} from "@/features/stations/service";
 import { scanProjectFtp } from "@/lib/ftp/scanner";
 import { supabase } from "@/lib/supabase";
 import {
@@ -72,7 +74,7 @@ export async function POST(
         const stationsStart = Date.now();
 
         const stations =
-            await loadStations(
+            await loadStationScanInputs(
                 projectId,
             );
 
