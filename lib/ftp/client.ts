@@ -9,21 +9,43 @@ export async function connectFtp(): Promise<Client> {
 
     if (!host || !port || !user || !password) {
         throw new Error(
-            "FTP configuration is missing. Check FTP_HOST, FTP_PORT, FTP_USER and FTP_PASSWORD."
+            "FTP configuration is missing. Check FTP_HOST, FTP_PORT, FTP_USER and FTP_PASSWORD.",
         );
     }
 
     const client = new Client();
 
-    client.ftp.verbose = true;
-
-    await client.access({
+    await client.connect(
         host,
         port,
+    );
+
+    await client.login(
         user,
         password,
-        secure: false,
-    });
+    );
+
+    /*
+     * Giữ binary mode giống useDefaultSettings()
+     * để không ảnh hưởng download/upload file.
+     */
+    await client.send(
+        "TYPE I",
+    );
+
+    await client.send(
+        "STRU F",
+    );
+
+    /*
+     * FileZilla server đã xác nhận hỗ trợ MLSD.
+     * Giữ MLSD làm phương thức LIST chính.
+     */
+    client.availableListCommands = [
+        "MLSD",
+        "LIST -a",
+        "LIST",
+    ];
 
     return client;
 }
