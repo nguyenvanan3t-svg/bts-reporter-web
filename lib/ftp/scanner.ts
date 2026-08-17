@@ -421,15 +421,6 @@ async function scanExcelSources(
     excelFiles: string[],
     stationCodes: string[],
 ): Promise<ExcelStationScanResult[]> {
-    const findExcelStart = Date.now();
-
-    console.log(
-        "[FTP Excel Scan] findExcelFiles:",
-        Date.now() - findExcelStart,
-        "ms",
-        `(${excelFiles.length} files)`,
-    );
-
     const results: ExcelStationScanResult[] =
         [];
 
@@ -483,20 +474,9 @@ async function scanExcelSources(
                             },
                         });
 
-                    const downloadStart =
-                        Date.now();
-
                     await client.downloadTo(
                         writable,
                         filePath,
-                    );
-
-                    console.log(
-                        "[FTP Excel Scan] download:",
-                        Date.now() -
-                            downloadStart,
-                        "ms",
-                        fileName,
                     );
 
                     const buffer =
@@ -504,23 +484,12 @@ async function scanExcelSources(
                             chunks,
                         );
 
-                    const parseStart =
-                        Date.now();
-
                     const matches =
                         parseExcelStationFile(
                             buffer,
                             fileName,
                             stationCodes,
                         );
-
-                    console.log(
-                        "[FTP Excel Scan] parse BTSinfo:",
-                        Date.now() -
-                            parseStart,
-                        "ms",
-                        fileName,
-                    );
 
                     results.push(
                         ...matches,
