@@ -10,11 +10,14 @@ export async function readExcel(
     const workbook =
         XLSX.read(buffer);
 
-    const firstSheet =
-        workbook.SheetNames[0];
-
     const worksheet =
-        workbook.Sheets[firstSheet];
+        workbook.Sheets["BTSinfo"];
+
+    if (!worksheet) {
+        throw new Error(
+            'Sheet "BTSinfo" not found in Excel file.',
+        );
+    }
 
     return XLSX.utils.sheet_to_json(
         worksheet,
