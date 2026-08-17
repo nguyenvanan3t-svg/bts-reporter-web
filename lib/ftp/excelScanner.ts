@@ -61,11 +61,19 @@ export function parseExcelStationFile(
     fileName: string,
     stationCodes: string[],
 ): ExcelStationMatch[] {
+    const readStart = Date.now();
+
     const workbook =
         XLSX.read(buffer, {
             type: "buffer",
             cellDates: false,
         });
+
+    console.log(
+        "[FTP Excel Parser] XLSX.read:",
+        Date.now() - readStart,
+        "ms",
+    );
 
     /*
      * Business Rule:
@@ -91,6 +99,8 @@ export function parseExcelStationFile(
      *
      * Bây giờ dùng chung một rows.
      */
+    const jsonStart = Date.now();
+
     const rows =
         XLSX.utils.sheet_to_json<
             unknown[]
@@ -99,6 +109,12 @@ export function parseExcelStationFile(
             defval: "",
             raw: false,
         });
+
+    console.log(
+        "[FTP Excel Parser] sheet_to_json:",
+        Date.now() - jsonStart,
+        "ms",
+    );
 
     /*
      * Tìm header trong 30 dòng đầu.
