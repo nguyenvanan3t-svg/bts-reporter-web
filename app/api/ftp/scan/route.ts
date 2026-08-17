@@ -15,9 +15,18 @@ export async function POST(
     request: Request,
 ) {
     let scanRunId: string | null = null;
+    const routeStart = Date.now();
     try {
+        const bodyStart = Date.now();
+
         const body =
             await request.json();
+
+        console.log(
+            "[FTP API] request.json:",
+            Date.now() - bodyStart,
+            "ms",
+        );
 
         const projectId =
             body.projectId;
@@ -36,10 +45,18 @@ export async function POST(
             );
         }
 
+        const projectStart = Date.now();
+
         const project =
             await projectRepository.findById(
                 projectId,
             );
+
+        console.log(
+            "[FTP API] findProject:",
+            Date.now() - projectStart,
+            "ms",
+        );
 
         if (!project) {
             return NextResponse.json(
@@ -52,10 +69,19 @@ export async function POST(
             );
         }
 
+        const stationsStart = Date.now();
+
         const stations =
             await loadStations(
                 projectId,
             );
+
+        console.log(
+            "[FTP API] loadStations:",
+            Date.now() - stationsStart,
+            "ms",
+            `(${stations.length} stations)`,
+        );
 
         if (stations.length === 0) {
             return NextResponse.json(
@@ -71,6 +97,8 @@ export async function POST(
         const startedAt =
             new Date().toISOString();
 
+        const scanRunInsertStart = Date.now();
+
         const {
             data: scanRun,
             error: scanRunError,
@@ -83,12 +111,24 @@ export async function POST(
             })
             .select("id")
             .single();
+
+        console.log(
+            "[FTP API] insert scanRun:",
+            Date.now() - scanRunInsertStart,
+            "ms",
+        );
         
         if (scanRunError) {
             throw scanRunError;
         }
 
         scanRunId = scanRun.id;
+
+        console.log(
+            "[FTP API] before scanProjectFtp:",
+            Date.now() - routeStart,
+            "ms",
+        );
 
         const result =
             await scanProjectFtp(
