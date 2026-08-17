@@ -91,8 +91,6 @@ export async function getStationsByProject(
     }));
 }
 
-const STATION_SCAN_PAGE_CONCURRENCY = 4;
-
 export async function getStationScanInputsByProject(
     projectId: string,
 ): Promise<
@@ -102,135 +100,64 @@ export async function getStationScanInputsByProject(
     }>
 > {
 
-    const {
-        count,
-        error: countError,
-    } = await supabase
-        .from("stations")
-        .select(
-            "id",
-            {
-                count: "exact",
-                head: true,
-            },
-        )
-        .eq(
-            "project_id",
-            projectId,
-        )
-        .eq(
-            "is_removed",
-            false,
-        );
-
-    if (countError) {
-        throw countError;
-    }
-
-    const total =
-        count ?? 0;
-
-    if (total === 0) {
-        return [];
-    }
-
-    const totalPages =
-        Math.ceil(
-            total /
-                STATION_PAGE_SIZE,
-        );
-
     const allRows: Array<{
         id: string;
         code: string;
     }> = [];
 
-    for (
-        let batchStart = 0;
-        batchStart < totalPages;
-        batchStart +=
-            STATION_SCAN_PAGE_CONCURRENCY
-    ) {
+    let from = 0;
 
-        const pageRequests: Array<
-            Promise<
-                Array<{
-                    id: string;
-                    code: string;
-                }>
-            >
-        > = [];
+    while (true) {
 
-        const batchEnd =
-            Math.min(
-                batchStart +
-                    STATION_SCAN_PAGE_CONCURRENCY,
-                totalPages,
+        const {
+            data,
+            error,
+        } = await supabase
+            .from("stations")
+            .select(
+                "id, code",
+            )
+            .eq(
+                "project_id",
+                projectId,
+            )
+            .eq(
+                "is_removed",
+                false,
+            )
+            .order(
+                "id",
+                {
+                    ascending: true,
+                },
+            )
+            .range(
+                from,
+                from +
+                    STATION_PAGE_SIZE -
+                    1,
             );
 
-        for (
-            let pageIndex =
-                batchStart;
-            pageIndex < batchEnd;
-            pageIndex++
+        if (error) {
+            throw error;
+        }
+
+        const rows =
+            data ?? [];
+
+        allRows.push(
+            ...rows,
+        );
+
+        if (
+            rows.length <
+            STATION_PAGE_SIZE
         ) {
-
-            const from =
-                pageIndex *
-                STATION_PAGE_SIZE;
-
-            const to =
-                Math.min(
-                    from +
-                        STATION_PAGE_SIZE -
-                        1,
-                    total - 1,
-                );
-
-            pageRequests.push(
-                (async () => {
-
-                    const {
-                        data,
-                        error,
-                    } = await supabase
-                        .from("stations")
-                        .select(
-                            "id, code",
-                        )
-                        .eq(
-                            "project_id",
-                            projectId,
-                        )
-                        .eq(
-                            "is_removed",
-                            false,
-                        )
-                        .range(
-                            from,
-                            to,
-                        );
-
-                    if (error) {
-                        throw error;
-                    }
-
-                    return data ?? [];
-
-                })(),
-            );
+            break;
         }
 
-        const pages =
-            await Promise.all(
-                pageRequests,
-            );
-
-        for (const page of pages) {
-            allRows.push(
-                ...page,
-            );
-        }
+        from +=
+            STATION_PAGE_SIZE;
     }
 
     return allRows;
