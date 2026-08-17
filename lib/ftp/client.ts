@@ -15,6 +15,8 @@ export async function connectFtp(): Promise<Client> {
 
     const client = new Client();
 
+    client.ftp.verbose = true;
+
     await client.access({
         host,
         port,
