@@ -525,17 +525,7 @@ export async function scanProjectFtp(
     projectName: string,
     stations: ScanStationInput[],
 ): Promise<ProjectFtpScanResult> {
-    const scanStart = Date.now();
-
-    const connectStart = Date.now();
-
     const client = await connectFtp();
-
-    console.log(
-        "[FTP Scan] connect:",
-        Date.now() - connectStart,
-        "ms",
-    );
 
     try {
         const projectPath =
@@ -556,33 +546,16 @@ export async function scanProjectFtp(
             );
         }
 
-        const projectListStart = Date.now();
-
         const projectItems =
             await client.list(
                 projectPath,
             );
-
-        console.log(
-            "[FTP Scan] list project:",
-            Date.now() - projectListStart,
-            "ms",
-            `(${projectItems.length} items)`,
-        );
-
-        const surveyStart = Date.now();
 
         await scanSurvey(
             client,
             projectPath,
             projectItems,
             stationResults,
-        );
-
-        console.log(
-            "[FTP Scan] survey:",
-            Date.now() - surveyStart,
-            "ms",
         );
 
         const hoSoPath =
@@ -597,16 +570,12 @@ export async function scanProjectFtp(
             );
 
         if (hasHoSo) {
-            const documentsStart = Date.now();
-
             const excelFiles =
                 await scanDocuments(
                     client,
                     hoSoPath,
                     stationResults,
                 );
-
-            const excelStart = Date.now();
 
             const excelResults =
                 await scanExcelSources(
@@ -617,8 +586,6 @@ export async function scanProjectFtp(
                             station.code,
                     ),
                 );
-
-            const databaseStart = Date.now();
 
             for (const excelResult of excelResults) {
                 const station =

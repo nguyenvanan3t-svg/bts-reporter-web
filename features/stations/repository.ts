@@ -856,9 +856,6 @@ export async function upsertStationsFtpResources(
                             ],
                         );
 
-                    const batchStart =
-                        Date.now();
-
                     const { error } =
                         await supabase
                             .from(
@@ -875,21 +872,6 @@ export async function upsertStationsFtpResources(
                     if (error) {
                         throw error;
                     }
-
-                    console.log(
-                        "[FTP Resource DB] batch:",
-                        start +
-                            batchIndex +
-                            1,
-                        "/",
-                        batches.length,
-                        "stations:",
-                        batch.length,
-                        "time:",
-                        Date.now() -
-                            batchStart,
-                        "ms",
-                    );
                 },
             ),
         );
