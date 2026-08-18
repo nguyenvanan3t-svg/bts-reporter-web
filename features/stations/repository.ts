@@ -475,7 +475,7 @@ export async function getProjectFtpResources(
             (station) => station.id,
         );
 
-    const RESOURCE_QUERY_BATCH_SIZE = 500;
+    const RESOURCE_QUERY_BATCH_SIZE = 200;
 
     const allResourceRows: any[] = [];
 
