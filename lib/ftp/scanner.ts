@@ -638,22 +638,78 @@ export async function scanProjectFtp(
 
             const databaseStart = Date.now();
 
+            const stationByCode =
+                new Map(
+                    stations.map(
+                        (station) => [
+                            station.code.toUpperCase(),
+                            station,
+                        ],
+                    ),
+                );
+
+            const latestExcelResults =
+                new Map<
+                    string,
+                    ExcelStationScanResult
+                >();
+
             for (const excelResult of excelResults) {
-                const station =
-                    stations.find(
-                        (item) =>
-                            item.code.toUpperCase() ===
-                            excelResult.stationCode.toUpperCase(),
+                latestExcelResults.set(
+                    excelResult.stationCode.toUpperCase(),
+                    excelResult,
+                );
+            }
+
+            const excelDbUpdates =
+                Array.from(
+                    latestExcelResults.values(),
+                ).flatMap(
+                    (excelResult) => {
+                        const station =
+                            stationByCode.get(
+                                excelResult.stationCode.toUpperCase(),
+                            );
+
+                        if (!station) {
+                            return [];
+                        }
+
+                        return [
+                            {
+                                station,
+                                excelResult,
+                            },
+                        ];
+                    },
+                );
+
+            const EXCEL_DB_UPDATE_CONCURRENCY = 8;
+
+            for (
+                let start = 0;
+                start < excelDbUpdates.length;
+                start += EXCEL_DB_UPDATE_CONCURRENCY
+            ) {
+                const batch =
+                    excelDbUpdates.slice(
+                        start,
+                        start +
+                            EXCEL_DB_UPDATE_CONCURRENCY,
                     );
 
-                if (!station) {
-                    continue;
-                }
-
-                await updateStationFromExcel(
-                    station.id,
-                    excelResult.address,
-                    excelResult.fileName,
+                await Promise.all(
+                    batch.map(
+                        ({
+                            station,
+                            excelResult,
+                        }) =>
+                            updateStationFromExcel(
+                                station.id,
+                                excelResult.address,
+                                excelResult.fileName,
+                            ),
+                    ),
                 );
             }
 
