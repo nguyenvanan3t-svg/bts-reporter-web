@@ -119,41 +119,43 @@ function createInitialStationResult(
     };
 }
 
-function getResourceType(
+function getResourceInfo(
     fileName: string,
-    stationCode: string,
-): "word" | "visio" | "pdf" | null {
-    const escapedCode = stationCode.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&",
-    );
+): {
+    stationCode: string;
+    resourceType: "word" | "visio" | "pdf";
+} | null {
 
-    const pattern = new RegExp(
-        `_\\(${escapedCode}\\)\\.(docx|vsdx|pdf)$`,
-        "i",
-    );
-
-    const match = fileName.match(pattern);
+    const match =
+        fileName.match(
+            /_\(([^()]+)\)\.(docx|vsdx|pdf)$/i,
+        );
 
     if (!match) {
         return null;
     }
 
-    const extension = match[1].toLowerCase();
+    const extension =
+        match[2].toLowerCase();
+
+    let resourceType:
+        | "word"
+        | "visio"
+        | "pdf";
 
     if (extension === "docx") {
-        return "word";
+        resourceType = "word";
+    } else if (extension === "vsdx") {
+        resourceType = "visio";
+    } else {
+        resourceType = "pdf";
     }
 
-    if (extension === "vsdx") {
-        return "visio";
-    }
-
-    if (extension === "pdf") {
-        return "pdf";
-    }
-
-    return null;
+    return {
+        stationCode:
+            match[1].trim(),
+        resourceType,
+    };
 }
 
 async function scanSurvey(
@@ -360,10 +362,21 @@ async function scanDocuments(
     hoSoPath: string,
     stationResults: Map<string, StationFtpScanResult>,
 ): Promise<string[]> {
-    const stationCodes =
-        Array.from(
-            stationResults.keys(),
+    const stationByCode =
+        new Map<
+            string,
+            StationFtpScanResult
+        >();
+
+    for (
+        const [stationCode, result]
+        of stationResults
+    ) {
+        stationByCode.set(
+            stationCode.toUpperCase(),
+            result,
         );
+    }
 
     const excelFiles: string[] = [];
 
@@ -411,32 +424,29 @@ async function scanDocuments(
                 continue;
             }
 
-            for (
-                const stationCode of stationCodes
-            ) {
-                const resourceType =
-                    getResourceType(
-                        item.name,
-                        stationCode,
-                    );
+            const resourceInfo =
+                getResourceInfo(
+                    item.name,
+                );
 
-                if (!resourceType) {
-                    continue;
-                }
-
-                const result =
-                    stationResults.get(
-                        stationCode,
-                    )!;
-
-                result[resourceType] =
-                    createFoundResource(
-                        item,
-                        itemPath,
-                    );
-
-                break;
+            if (!resourceInfo) {
+                continue;
             }
+
+            const result =
+                stationByCode.get(
+                    resourceInfo.stationCode.toUpperCase(),
+                );
+
+            if (!result) {
+                continue;
+            }
+
+            result[resourceInfo.resourceType] =
+                createFoundResource(
+                    item,
+                    itemPath,
+                );
         }
     }
 
