@@ -721,6 +721,12 @@ export async function scanProjectFtp(
                             );
 
                         if (!cached) {
+                            console.log(
+                                "[FTP Excel Cache MISS]",
+                                file.fileName,
+                                "no cached record",
+                            );
+
                             return true;
                         }
 
@@ -728,11 +734,35 @@ export async function scanProjectFtp(
                             file.modifiedAt?.toISOString() ??
                             null;
 
-                        return (
+                        const sizeChanged =
                             cached.size !==
-                                file.size ||
+                            file.size;
+
+                        const modifiedAtChanged =
                             cached.modifiedAt !==
-                                modifiedAt
+                            modifiedAt;
+
+                        console.log(
+                            "[FTP Excel Cache Compare]",
+                            file.fileName,
+                            {
+                                cachedSize:
+                                    cached.size,
+                                ftpSize:
+                                    file.size,
+                                sizeChanged,
+
+                                cachedModifiedAt:
+                                    cached.modifiedAt,
+                                ftpModifiedAt:
+                                    modifiedAt,
+                                modifiedAtChanged,
+                            },
+                        );
+
+                        return (
+                            sizeChanged ||
+                            modifiedAtChanged
                         );
                     },
                 );
