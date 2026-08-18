@@ -574,11 +574,19 @@ export async function scanProjectFtp(
                 projectPath,
             );
 
+        const surveyStart = Date.now();
+
         await scanSurvey(
             client,
             projectPath,
             projectItems,
             stationResults,
+        );
+
+        console.log(
+            "[FTP Survey]",
+            Date.now() - surveyStart,
+            "ms",
         );
 
         const hoSoPath =
@@ -593,12 +601,23 @@ export async function scanProjectFtp(
             );
 
         if (hasHoSo) {
+            const documentsStart = Date.now();
+
             const excelFiles =
                 await scanDocuments(
                     client,
                     hoSoPath,
                     stationResults,
                 );
+
+            console.log(
+                "[FTP Documents]",
+                Date.now() - documentsStart,
+                "ms",
+                `(${excelFiles.length} files)`,
+            );
+
+            const excelStart = Date.now();
 
             const excelResults =
                 await scanExcelSources(
@@ -609,6 +628,15 @@ export async function scanProjectFtp(
                             station.code,
                     ),
                 );
+
+            console.log(
+                "[FTP Excel]",
+                Date.now() - excelStart,
+                "ms",
+                `(${excelResults.length} results)`,
+            );
+
+            const databaseStart = Date.now();
 
             for (const excelResult of excelResults) {
                 const station =
@@ -628,6 +656,12 @@ export async function scanProjectFtp(
                     excelResult.fileName,
                 );
             }
+
+            console.log(
+                "[FTP Excel DB]",
+                Date.now() - databaseStart,
+                "ms",
+            );
         }
 
         const ftpResourceUpdates =
