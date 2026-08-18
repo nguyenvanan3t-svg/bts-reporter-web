@@ -94,6 +94,7 @@ export async function POST(
 
         const result =
             await scanProjectFtp(
+                projectId,
                 project.name,
                 stations.map(
                     (station) => ({

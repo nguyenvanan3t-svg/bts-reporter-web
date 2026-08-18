@@ -3,6 +3,8 @@ import { Writable } from "node:stream";
 
 import { connectFtp } from "@/lib/ftp/client";
 import {
+    getFtpExcelSources,
+    upsertFtpExcelSources,
     upsertStationsFtpResources,
     updateStationsFromExcel,
 } from "@/features/stations/repository";
@@ -30,6 +32,13 @@ type ExcelStationScanResult = {
 type FtpListItem = {
     name: string;
     type: FileType;
+    size: number;
+    modifiedAt?: Date;
+};
+
+type ExcelFtpFile = {
+    path: string;
+    fileName: string;
     size: number;
     modifiedAt?: Date;
 };
@@ -361,7 +370,7 @@ async function scanDocuments(
     client: Awaited<ReturnType<typeof connectFtp>>,
     hoSoPath: string,
     stationResults: Map<string, StationFtpScanResult>,
-): Promise<string[]> {
+): Promise<ExcelFtpFile[]> {
     const stationByCode =
         new Map<
             string,
@@ -378,7 +387,7 @@ async function scanDocuments(
         );
     }
 
-    const excelFiles: string[] = [];
+    const excelFiles: ExcelFtpFile[] = [];
 
     async function scanFolder(
         folderPath: string,
@@ -417,9 +426,12 @@ async function scanDocuments(
                 lowerName.endsWith(".xlsx") ||
                 lowerName.endsWith(".xlsm")
             ) {
-                excelFiles.push(
-                    itemPath,
-                );
+                excelFiles.push({
+                    path: itemPath,
+                    fileName: item.name,
+                    size: item.size,
+                    modifiedAt: item.modifiedAt,
+                });
 
                 continue;
             }
@@ -459,10 +471,16 @@ async function scanDocuments(
 
 async function scanExcelSources(
     _client: Awaited<ReturnType<typeof connectFtp>>,
-    excelFiles: string[],
+    excelFiles: ExcelFtpFile[],
     stationCodes: string[],
-): Promise<ExcelStationScanResult[]> {
+): Promise<{
+    results: ExcelStationScanResult[];
+    processedFiles: ExcelFtpFile[];
+}> {
     const results: ExcelStationScanResult[] =
+        [];
+
+    const processedFiles: ExcelFtpFile[] =
         [];
 
     const concurrency = 4;
@@ -485,14 +503,14 @@ async function scanExcelSources(
                     return;
                 }
 
-                const filePath =
+                const excelFile =
                     excelFiles[index];
 
+                const filePath =
+                    excelFile.path;
+
                 const fileName =
-                    filePath
-                        .split("/")
-                        .pop() ??
-                    filePath;
+                    excelFile.fileName;
 
                 try {
                     const chunks: Buffer[] =
@@ -515,7 +533,8 @@ async function scanExcelSources(
                             },
                         });
 
-                    const downloadStart = Date.now();
+                    const downloadStart =
+                        Date.now();
 
                     await client.downloadTo(
                         writable,
@@ -523,14 +542,16 @@ async function scanExcelSources(
                     );
 
                     const downloadMs =
-                        Date.now() - downloadStart;
+                        Date.now() -
+                        downloadStart;
 
                     const buffer =
                         Buffer.concat(
                             chunks,
                         );
 
-                    const parseStart = Date.now();
+                    const parseStart =
+                        Date.now();
 
                     const matches =
                         parseExcelStationFile(
@@ -540,7 +561,8 @@ async function scanExcelSources(
                         );
 
                     const parseMs =
-                        Date.now() - parseStart;
+                        Date.now() -
+                        parseStart;
 
                     console.log(
                         "[FTP Excel File]",
@@ -560,6 +582,10 @@ async function scanExcelSources(
 
                     results.push(
                         ...matches,
+                    );
+
+                    processedFiles.push(
+                        excelFile,
                     );
                 } catch (error) {
                     console.error(
@@ -588,10 +614,14 @@ async function scanExcelSources(
         workers,
     );
 
-    return results;
+    return {
+        results,
+        processedFiles,
+    };
 }
 
 export async function scanProjectFtp(
+    projectId: string,
     projectName: string,
     stations: ScanStationInput[],
 ): Promise<ProjectFtpScanResult> {
@@ -664,12 +694,76 @@ export async function scanProjectFtp(
                 `(${excelFiles.length} files)`,
             );
 
-            const excelStart = Date.now();
+            const excelCacheStart =
+                Date.now();
 
-            const excelResults =
+            const cachedExcelSources =
+                await getFtpExcelSources(
+                    projectId,
+                );
+
+            const cachedExcelByPath =
+                new Map(
+                    cachedExcelSources.map(
+                        (source) => [
+                            source.path,
+                            source,
+                        ],
+                    ),
+                );
+
+            const excelFilesToScan =
+                excelFiles.filter(
+                    (file) => {
+                        const cached =
+                            cachedExcelByPath.get(
+                                file.path,
+                            );
+
+                        if (!cached) {
+                            return true;
+                        }
+
+                        const modifiedAt =
+                            file.modifiedAt?.toISOString() ??
+                            null;
+
+                        return (
+                            cached.size !==
+                                file.size ||
+                            cached.modifiedAt !==
+                                modifiedAt
+                        );
+                    },
+                );
+
+            console.log(
+                "[FTP Excel Cache]",
+                "total",
+                excelFiles.length,
+                "cached",
+                cachedExcelSources.length,
+                "toScan",
+                excelFilesToScan.length,
+                "skip",
+                excelFiles.length -
+                    excelFilesToScan.length,
+                "check",
+                Date.now() -
+                    excelCacheStart,
+                "ms",
+            );
+
+            const excelStart =
+                Date.now();
+
+            const {
+                results: excelResults,
+                processedFiles,
+            } =
                 await scanExcelSources(
                     client,
-                    excelFiles,
+                    excelFilesToScan,
                     stations.map(
                         (station) =>
                             station.code,
@@ -678,12 +772,15 @@ export async function scanProjectFtp(
 
             console.log(
                 "[FTP Excel]",
-                Date.now() - excelStart,
+                Date.now() -
+                    excelStart,
                 "ms",
                 `(${excelResults.length} results)`,
+                `(${processedFiles.length} files processed)`,
             );
 
-            const databaseStart = Date.now();
+            const databaseStart =
+                Date.now();
 
             const stationByCode =
                 new Map(
@@ -701,7 +798,10 @@ export async function scanProjectFtp(
                     ExcelStationScanResult
                 >();
 
-            for (const excelResult of excelResults) {
+            for (
+                const excelResult
+                of excelResults
+            ) {
                 latestExcelResults.set(
                     excelResult.stationCode.toUpperCase(),
                     excelResult,
@@ -741,9 +841,30 @@ export async function scanProjectFtp(
 
             console.log(
                 "[FTP Excel DB]",
-                Date.now() - databaseStart,
+                Date.now() -
+                    databaseStart,
                 "ms",
             );
+
+            if (
+                processedFiles.length > 0
+            ) {
+                const cacheStart =
+                    Date.now();
+
+                await upsertFtpExcelSources(
+                    projectId,
+                    processedFiles,
+                );
+
+                console.log(
+                    "[FTP Excel Cache Update]",
+                    Date.now() -
+                        cacheStart,
+                    "ms",
+                    `(${processedFiles.length} files)`,
+                );
+            }
         }
 
         const ftpResourceUpdates =
@@ -795,12 +916,14 @@ export async function scanProjectFtp(
 }
 
 export async function scanStationFtp(
+    projectId: string,
     projectName: string,
     stationId: string,
     stationCode: string,
 ): Promise<StationFtpScanResult> {
     const result =
         await scanProjectFtp(
+            projectId,
             projectName,
             [
                 {

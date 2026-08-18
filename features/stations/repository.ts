@@ -11,6 +11,16 @@ const TABLE = "stations";
 
 const STATION_PAGE_SIZE = 1000;
 
+type FtpExcelSource = {
+    id: string;
+    projectId: string;
+    path: string;
+    fileName: string;
+    size: number;
+    modifiedAt: string | null;
+    scannedAt: string;
+};
+
 async function fetchStationsByProject(
     projectId: string,
     includeRemoved: boolean,
@@ -335,6 +345,85 @@ export async function updateStationsFromExcel(
                             item.excelSource,
                     }),
                 ),
+            },
+        );
+
+    if (error) {
+        throw error;
+    }
+}
+
+export async function getFtpExcelSources(
+    projectId: string,
+): Promise<FtpExcelSource[]> {
+
+    const { data, error } = await supabase
+        .from("ftp_excel_sources")
+        .select(
+            "id, project_id, path, file_name, size, modified_at, scanned_at",
+        )
+        .eq(
+            "project_id",
+            projectId,
+        );
+
+    if (error) {
+        throw error;
+    }
+
+    return (data ?? []).map(
+        (item) => ({
+            id: item.id,
+            projectId: item.project_id,
+            path: item.path,
+            fileName: item.file_name,
+            size: item.size,
+            modifiedAt:
+                item.modified_at,
+            scannedAt:
+                item.scanned_at,
+        }),
+    );
+}
+
+export async function upsertFtpExcelSources(
+    projectId: string,
+    files: Array<{
+        path: string;
+        fileName: string;
+        size: number;
+        modifiedAt?: Date;
+    }>,
+): Promise<void> {
+
+    if (files.length === 0) {
+        return;
+    }
+
+    const scannedAt =
+        new Date().toISOString();
+
+    const rows = files.map(
+        (file) => ({
+            project_id: projectId,
+            path: file.path,
+            file_name: file.fileName,
+            size: file.size,
+            modified_at:
+                file.modifiedAt?.toISOString() ??
+                null,
+            scanned_at: scannedAt,
+            updated_at: scannedAt,
+        }),
+    );
+
+    const { error } = await supabase
+        .from("ftp_excel_sources")
+        .upsert(
+            rows,
+            {
+                onConflict:
+                    "project_id,path",
             },
         );
 

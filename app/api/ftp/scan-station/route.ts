@@ -85,6 +85,7 @@ export async function POST(
 
         const station =
             await scanStationFtp(
+                projectId,
                 project.name,
                 stationRecord.id,
                 stationCode.trim(),
