@@ -4,7 +4,7 @@ import { Writable } from "node:stream";
 import { connectFtp } from "@/lib/ftp/client";
 import {
     upsertStationsFtpResources,
-    updateStationFromExcel,
+    updateStationsFromExcel,
 } from "@/features/stations/repository";
 
 import type {
@@ -677,41 +677,20 @@ export async function scanProjectFtp(
 
                         return [
                             {
-                                station,
-                                excelResult,
+                                stationId:
+                                    station.id,
+                                address:
+                                    excelResult.address,
+                                excelSource:
+                                    excelResult.fileName,
                             },
                         ];
                     },
                 );
 
-            const EXCEL_DB_UPDATE_CONCURRENCY = 8;
-
-            for (
-                let start = 0;
-                start < excelDbUpdates.length;
-                start += EXCEL_DB_UPDATE_CONCURRENCY
-            ) {
-                const batch =
-                    excelDbUpdates.slice(
-                        start,
-                        start +
-                            EXCEL_DB_UPDATE_CONCURRENCY,
-                    );
-
-                await Promise.all(
-                    batch.map(
-                        ({
-                            station,
-                            excelResult,
-                        }) =>
-                            updateStationFromExcel(
-                                station.id,
-                                excelResult.address,
-                                excelResult.fileName,
-                            ),
-                    ),
-                );
-            }
+            await updateStationsFromExcel(
+                excelDbUpdates,
+            );
 
             console.log(
                 "[FTP Excel DB]",

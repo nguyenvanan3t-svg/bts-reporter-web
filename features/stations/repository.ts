@@ -309,6 +309,40 @@ export async function updateStationFromExcel(
     }
 }
 
+export async function updateStationsFromExcel(
+    updates: Array<{
+        stationId: string;
+        address: string;
+        excelSource: string;
+    }>,
+): Promise<void> {
+
+    if (updates.length === 0) {
+        return;
+    }
+
+    const { error } =
+        await supabase.rpc(
+            "update_stations_from_excel",
+            {
+                p_updates: updates.map(
+                    (item) => ({
+                        station_id:
+                            item.stationId,
+                        address:
+                            item.address,
+                        excel_source:
+                            item.excelSource,
+                    }),
+                ),
+            },
+        );
+
+    if (error) {
+        throw error;
+    }
+}
+
 export async function removeStation(
     stationId: string,
 ): Promise<void> {
