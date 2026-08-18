@@ -48,12 +48,16 @@ function normalizeStationFolderName(
     return folderName.trim();
 }
 
-function isSurveyZipForStation(
+function getSurveyStationCode(
     fileName: string,
-    stationCode: string,
-): boolean {
-    if (!fileName.toLowerCase().endsWith(".zip")) {
-        return false;
+): string | null {
+
+    if (
+        !fileName
+            .toLowerCase()
+            .endsWith(".zip")
+    ) {
+        return null;
     }
 
     const baseName = fileName.slice(
@@ -61,17 +65,16 @@ function isSurveyZipForStation(
         -4,
     );
 
-    const escapedCode = stationCode.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&",
-    );
+    const separatorIndex =
+        baseName.lastIndexOf("_");
 
-    const pattern = new RegExp(
-        `(^|_)${escapedCode}$`,
-        "i",
-    );
+    if (separatorIndex === -1) {
+        return baseName.trim();
+    }
 
-    return pattern.test(baseName);
+    return baseName
+        .slice(separatorIndex + 1)
+        .trim();
 }
 
 function createMissingResource(): FtpResource {
@@ -160,6 +163,18 @@ async function scanSurvey(
     stationResults: Map<string, StationFtpScanResult>,
 ) {
     let surveyListCount = 0;
+    const stationByCode =
+        new Map<string, StationFtpScanResult>();
+
+    for (
+        const [stationCode, result]
+        of stationResults
+    ) {
+        stationByCode.set(
+            stationCode.toUpperCase(),
+            result,
+        );
+    }
     const provinceFolders = projectItems.filter(
         (item) =>
             item.type === FileType.Directory &&
@@ -198,28 +213,26 @@ async function scanSurvey(
             * └── NguyenVanA_DNG0004-11.zip
             */
             if (item.type === FileType.File) {
-                for (const stationCode of stationResults.keys()) {
-                    if (
-                        !isSurveyZipForStation(
-                            item.name,
-                            stationCode,
-                        )
-                    ) {
-                        continue;
-                    }
+
+                const stationCode =
+                    getSurveyStationCode(
+                        item.name,
+                    );
+
+                if (stationCode) {
 
                     const result =
-                        stationResults.get(
-                            stationCode,
-                        )!;
-
-                    result.survey =
-                        createFoundResource(
-                            item,
-                            `${provincePath}/${item.name}`,
+                        stationByCode.get(
+                            stationCode.toUpperCase(),
                         );
 
-                    break;
+                    if (result) {
+                        result.survey =
+                            createFoundResource(
+                                item,
+                                `${provincePath}/${item.name}`,
+                            );
+                    }
                 }
 
                 continue;
@@ -281,28 +294,26 @@ async function scanSurvey(
                     stationFolder.type ===
                     FileType.File
                 ) {
-                    for (const stationCode of stationResults.keys()) {
-                        if (
-                            !isSurveyZipForStation(
-                                stationFolder.name,
-                                stationCode,
-                            )
-                        ) {
-                            continue;
-                        }
+
+                    const stationCode =
+                        getSurveyStationCode(
+                            stationFolder.name,
+                        );
+
+                    if (stationCode) {
 
                         const result =
-                            stationResults.get(
-                                stationCode,
-                            )!;
-
-                        result.survey =
-                            createFoundResource(
-                                stationFolder,
-                                `${intermediatePath}/${stationFolder.name}`,
+                            stationByCode.get(
+                                stationCode.toUpperCase(),
                             );
 
-                        break;
+                        if (result) {
+                            result.survey =
+                                createFoundResource(
+                                    stationFolder,
+                                    `${intermediatePath}/${stationFolder.name}`,
+                                );
+                        }
                     }
 
                     continue;
