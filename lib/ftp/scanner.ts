@@ -515,15 +515,22 @@ async function scanExcelSources(
                             },
                         });
 
+                    const downloadStart = Date.now();
+
                     await client.downloadTo(
                         writable,
                         filePath,
                     );
 
+                    const downloadMs =
+                        Date.now() - downloadStart;
+
                     const buffer =
                         Buffer.concat(
                             chunks,
                         );
+
+                    const parseStart = Date.now();
 
                     const matches =
                         parseExcelStationFile(
@@ -531,6 +538,25 @@ async function scanExcelSources(
                             fileName,
                             stationCodes,
                         );
+
+                    const parseMs =
+                        Date.now() - parseStart;
+
+                    console.log(
+                        "[FTP Excel File]",
+                        fileName,
+                        "download",
+                        downloadMs,
+                        "ms",
+                        "parse",
+                        parseMs,
+                        "ms",
+                        "size",
+                        buffer.length,
+                        "bytes",
+                        "results",
+                        matches.length,
+                    );
 
                     results.push(
                         ...matches,
