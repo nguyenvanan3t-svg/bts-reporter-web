@@ -159,6 +159,7 @@ async function scanSurvey(
     projectItems: FtpListItem[],
     stationResults: Map<string, StationFtpScanResult>,
 ) {
+    let surveyListCount = 0;
     const provinceFolders = projectItems.filter(
         (item) =>
             item.type === FileType.Directory &&
@@ -170,8 +171,19 @@ async function scanSurvey(
         const provincePath =
             `${projectPath}/${province.name}`;
 
+        const provinceListStart = Date.now();
+
         const provinceItems =
             await client.list(provincePath);
+
+        console.log(
+            "[FTP Survey List]",
+            ++surveyListCount,
+            "province",
+            province.name,
+            Date.now() - provinceListStart,
+            "ms",
+        );
 
         for (const item of provinceItems) {
             /*
@@ -241,10 +253,21 @@ async function scanSurvey(
             const intermediatePath =
                 `${provincePath}/${item.name}`;
 
+            const intermediateListStart = Date.now();
+
             const intermediateItems =
                 await client.list(
                     intermediatePath,
                 );
+
+            console.log(
+                "[FTP Survey List]",
+                ++surveyListCount,
+                "intermediate",
+                item.name,
+                Date.now() - intermediateListStart,
+                "ms",
+            );
 
             for (const stationFolder of intermediateItems) {
                 /*
