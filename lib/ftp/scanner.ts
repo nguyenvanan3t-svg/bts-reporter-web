@@ -731,34 +731,23 @@ export async function scanProjectFtp(
                         }
 
                         const modifiedAt =
-                            file.modifiedAt?.toISOString() ??
+                            file.modifiedAt?.getTime() ??
                             null;
+
+                        const cachedModifiedAt =
+                            cached.modifiedAt
+                                ? new Date(
+                                    cached.modifiedAt,
+                                ).getTime()
+                                : null;
 
                         const sizeChanged =
                             cached.size !==
                             file.size;
 
                         const modifiedAtChanged =
-                            cached.modifiedAt !==
+                            cachedModifiedAt !==
                             modifiedAt;
-
-                        console.log(
-                            "[FTP Excel Cache Compare]",
-                            file.fileName,
-                            {
-                                cachedSize:
-                                    cached.size,
-                                ftpSize:
-                                    file.size,
-                                sizeChanged,
-
-                                cachedModifiedAt:
-                                    cached.modifiedAt,
-                                ftpModifiedAt:
-                                    modifiedAt,
-                                modifiedAtChanged,
-                            },
-                        );
 
                         return (
                             sizeChanged ||
