@@ -173,7 +173,6 @@ async function scanSurvey(
     projectItems: FtpListItem[],
     stationResults: Map<string, StationFtpScanResult>,
 ) {
-    let surveyListCount = 0;
     const stationByCode =
         new Map<string, StationFtpScanResult>();
 
@@ -197,19 +196,8 @@ async function scanSurvey(
         const provincePath =
             `${projectPath}/${province.name}`;
 
-        const provinceListStart = Date.now();
-
         const provinceItems =
             await client.list(provincePath);
-
-        console.log(
-            "[FTP Survey List]",
-            ++surveyListCount,
-            "province",
-            province.name,
-            Date.now() - provinceListStart,
-            "ms",
-        );
 
         for (const item of provinceItems) {
             /*
@@ -277,21 +265,10 @@ async function scanSurvey(
             const intermediatePath =
                 `${provincePath}/${item.name}`;
 
-            const intermediateListStart = Date.now();
-
             const intermediateItems =
                 await client.list(
                     intermediatePath,
                 );
-
-            console.log(
-                "[FTP Survey List]",
-                ++surveyListCount,
-                "intermediate",
-                item.name,
-                Date.now() - intermediateListStart,
-                "ms",
-            );
 
             for (const stationFolder of intermediateItems) {
                 /*
@@ -389,27 +366,13 @@ async function scanDocuments(
 
     const excelFiles: ExcelFtpFile[] = [];
 
-    let documentListCount = 0;
-    let documentListTotalMs = 0;
-
     async function scanFolder(
         folderPath: string,
     ): Promise<void> {
-        const listStart =
-            Date.now();
-
         const items =
             await client.list(
                 folderPath,
             );
-
-        const listMs =
-            Date.now() -
-            listStart;
-
-        documentListCount++;
-        documentListTotalMs +=
-            listMs;
 
         for (const item of items) {
             const itemPath =
@@ -480,23 +443,6 @@ async function scanDocuments(
         hoSoPath,
     );
 
-    console.log(
-        "[FTP Documents LIST]",
-        "count",
-        documentListCount,
-        "total",
-        documentListTotalMs,
-        "ms",
-        "avg",
-        documentListCount > 0
-            ? Math.round(
-                documentListTotalMs /
-                documentListCount,
-            )
-            : 0,
-        "ms",
-    );
-
     return excelFiles;
 }
 
@@ -564,25 +510,15 @@ async function scanExcelSources(
                             },
                         });
 
-                    const downloadStart =
-                        Date.now();
-
                     await client.downloadTo(
                         writable,
                         filePath,
                     );
 
-                    const downloadMs =
-                        Date.now() -
-                        downloadStart;
-
                     const buffer =
                         Buffer.concat(
                             chunks,
                         );
-
-                    const parseStart =
-                        Date.now();
 
                     const matches =
                         parseExcelStationFile(
@@ -590,26 +526,6 @@ async function scanExcelSources(
                             fileName,
                             stationCodes,
                         );
-
-                    const parseMs =
-                        Date.now() -
-                        parseStart;
-
-                    console.log(
-                        "[FTP Excel File]",
-                        fileName,
-                        "download",
-                        downloadMs,
-                        "ms",
-                        "parse",
-                        parseMs,
-                        "ms",
-                        "size",
-                        buffer.length,
-                        "bytes",
-                        "results",
-                        matches.length,
-                    );
 
                     results.push(
                         ...matches,
@@ -682,19 +598,11 @@ export async function scanProjectFtp(
                 projectPath,
             );
 
-        const surveyStart = Date.now();
-
         await scanSurvey(
             client,
             projectPath,
             projectItems,
             stationResults,
-        );
-
-        console.log(
-            "[FTP Survey]",
-            Date.now() - surveyStart,
-            "ms",
         );
 
         const hoSoPath =
@@ -709,24 +617,12 @@ export async function scanProjectFtp(
             );
 
         if (hasHoSo) {
-            const documentsStart = Date.now();
-
             const excelFiles =
                 await scanDocuments(
                     client,
                     hoSoPath,
                     stationResults,
                 );
-
-            console.log(
-                "[FTP Documents]",
-                Date.now() - documentsStart,
-                "ms",
-                `(${excelFiles.length} files)`,
-            );
-
-            const excelCacheStart =
-                Date.now();
 
             const cachedExcelSources =
                 await getFtpExcelSources(
@@ -798,14 +694,7 @@ export async function scanProjectFtp(
                 "skip",
                 excelFiles.length -
                     excelFilesToScan.length,
-                "check",
-                Date.now() -
-                    excelCacheStart,
-                "ms",
             );
-
-            const excelStart =
-                Date.now();
 
             const {
                 results: excelResults,
@@ -819,18 +708,6 @@ export async function scanProjectFtp(
                             station.code,
                     ),
                 );
-
-            console.log(
-                "[FTP Excel]",
-                Date.now() -
-                    excelStart,
-                "ms",
-                `(${excelResults.length} results)`,
-                `(${processedFiles.length} files processed)`,
-            );
-
-            const databaseStart =
-                Date.now();
 
             const stationByCode =
                 new Map(
@@ -889,30 +766,12 @@ export async function scanProjectFtp(
                 excelDbUpdates,
             );
 
-            console.log(
-                "[FTP Excel DB]",
-                Date.now() -
-                    databaseStart,
-                "ms",
-            );
-
             if (
                 processedFiles.length > 0
             ) {
-                const cacheStart =
-                    Date.now();
-
                 await upsertFtpExcelSources(
                     projectId,
                     processedFiles,
-                );
-
-                console.log(
-                    "[FTP Excel Cache Update]",
-                    Date.now() -
-                        cacheStart,
-                    "ms",
-                    `(${processedFiles.length} files)`,
                 );
             }
         }
