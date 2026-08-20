@@ -389,13 +389,27 @@ async function scanDocuments(
 
     const excelFiles: ExcelFtpFile[] = [];
 
+    let documentListCount = 0;
+    let documentListTotalMs = 0;
+
     async function scanFolder(
         folderPath: string,
     ): Promise<void> {
+        const listStart =
+            Date.now();
+
         const items =
             await client.list(
                 folderPath,
             );
+
+        const listMs =
+            Date.now() -
+            listStart;
+
+        documentListCount++;
+        documentListTotalMs +=
+            listMs;
 
         for (const item of items) {
             const itemPath =
@@ -464,6 +478,23 @@ async function scanDocuments(
 
     await scanFolder(
         hoSoPath,
+    );
+
+    console.log(
+        "[FTP Documents LIST]",
+        "count",
+        documentListCount,
+        "total",
+        documentListTotalMs,
+        "ms",
+        "avg",
+        documentListCount > 0
+            ? Math.round(
+                documentListTotalMs /
+                documentListCount,
+            )
+            : 0,
+        "ms",
     );
 
     return excelFiles;
