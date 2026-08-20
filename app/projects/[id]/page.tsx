@@ -65,12 +65,6 @@ export default async function ProjectDetailPage(
                     project={project}
                 />
 
-                <div
-                    style={{
-                        height: 24,
-                    }}
-                />
-
                 <ProjectFtpDashboard
                     project={project}
                     stations={stations}

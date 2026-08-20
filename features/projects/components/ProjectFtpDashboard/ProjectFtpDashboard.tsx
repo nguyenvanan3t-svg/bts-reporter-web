@@ -38,14 +38,13 @@ import {
     ProjectInformation,
 } from "@/features/projects/components/ProjectInformation";
 
-import {
-    ProjectMetrics,
-} from "@/features/projects/components/ProjectMetrics";
-
 import Card from "@/components/ui/Card";
 import StationList from "@/components/Station/StationList/StationList";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import ProjectFtpProgressChart from "./ProjectFtpProgressChart";
+import {
+    ProvinceProgress,
+} from "@/features/projects/components/ProvinceProgress";
 
 type Props = {
     project: Project;
@@ -635,28 +634,10 @@ export default function ProjectFtpDashboard({
                 }
                 center={
                     <div className="space-y-4">
-                        <ProjectMetrics
-                            total={stations.length}
-                            survey={
-                                hasScanned
-                                    ? scanSummary.survey
-                                    : 0
-                            }
-                            word={
-                                hasScanned
-                                    ? scanSummary.word
-                                    : 0
-                            }
-                            visio={
-                                hasScanned
-                                    ? scanSummary.visio
-                                    : 0
-                            }
-                            pdf={
-                                hasScanned
-                                    ? scanSummary.pdf
-                                    : 0
-                            }
+                        <ProvinceProgress
+                            stations={stations}
+                            ftpResults={scanResults}
+                            ftpScanned={hasScanned}
                         />
 
                         <Card>

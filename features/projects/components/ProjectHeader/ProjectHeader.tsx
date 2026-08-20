@@ -12,7 +12,7 @@ export default function ProjectHeader({
     return (
         <div
             style={{
-                marginBottom: 32,
+                marginBottom: 12,
             }}
         >
             <div
@@ -67,7 +67,7 @@ export default function ProjectHeader({
             <h1
                 style={{
                     margin: 0,
-                    fontSize: 34,
+                    fontSize: 22,
                     fontWeight: 700,
                     color: "#0f172a",
                 }}
