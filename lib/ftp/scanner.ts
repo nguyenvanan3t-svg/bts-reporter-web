@@ -387,33 +387,19 @@ async function scanDocuments(
         );
     }
 
-    type DocumentResourceUpdate = {
-        stationCode: string;
-        resourceType:
-            | "word"
-            | "visio"
-            | "pdf";
-        resource: FtpResource;
-    };
-
-    type DocumentScanResult = {
-        excelFiles: ExcelFtpFile[];
-        resourceUpdates:
-            DocumentResourceUpdate[];
-    };
+    const excelFiles: ExcelFtpFile[] = [];
 
     let documentListCount = 0;
     let documentListTotalMs = 0;
 
     async function scanFolder(
-        folderClient: Awaited<ReturnType<typeof connectFtp>>,
         folderPath: string,
-    ): Promise<DocumentScanResult> {
+    ): Promise<void> {
         const listStart =
             Date.now();
 
         const items =
-            await folderClient.list(
+            await client.list(
                 folderPath,
             );
 
@@ -425,11 +411,6 @@ async function scanDocuments(
         documentListTotalMs +=
             listMs;
 
-        const result: DocumentScanResult = {
-            excelFiles: [],
-            resourceUpdates: [],
-        };
-
         for (const item of items) {
             const itemPath =
                 `${folderPath}/${item.name}`;
@@ -438,18 +419,8 @@ async function scanDocuments(
                 item.type ===
                 FileType.Directory
             ) {
-                const nestedResult =
-                    await scanFolder(
-                        folderClient,
-                        itemPath,
-                    );
-
-                result.excelFiles.push(
-                    ...nestedResult.excelFiles,
-                );
-
-                result.resourceUpdates.push(
-                    ...nestedResult.resourceUpdates,
+                await scanFolder(
+                    itemPath,
                 );
 
                 continue;
@@ -469,12 +440,11 @@ async function scanDocuments(
                 lowerName.endsWith(".xlsx") ||
                 lowerName.endsWith(".xlsm")
             ) {
-                result.excelFiles.push({
+                excelFiles.push({
                     path: itemPath,
                     fileName: item.name,
                     size: item.size,
-                    modifiedAt:
-                        item.modifiedAt,
+                    modifiedAt: item.modifiedAt,
                 });
 
                 continue;
@@ -489,226 +459,26 @@ async function scanDocuments(
                 continue;
             }
 
-            if (
-                !stationByCode.has(
+            const result =
+                stationByCode.get(
                     resourceInfo.stationCode.toUpperCase(),
-                )
-            ) {
+                );
+
+            if (!result) {
                 continue;
             }
 
-            result.resourceUpdates.push({
-                stationCode:
-                    resourceInfo.stationCode,
-                resourceType:
-                    resourceInfo.resourceType,
-                resource:
-                    createFoundResource(
-                        item,
-                        itemPath,
-                    ),
-            });
-        }
-
-        return result;
-    }
-
-    // LIST thư mục Ho so bằng connection hiện tại.
-    const rootStart =
-        Date.now();
-
-    const rootItems =
-        await client.list(
-            hoSoPath,
-        );
-
-    const rootListMs =
-        Date.now() -
-        rootStart;
-
-    documentListCount++;
-    documentListTotalMs +=
-        rootListMs;
-
-    const rootResult:
-        DocumentScanResult = {
-        excelFiles: [],
-        resourceUpdates: [],
-    };
-
-    const branchPaths: string[] =
-        [];
-
-    // Xử lý file nằm trực tiếp trong Ho so
-    // và lấy danh sách các thư mục cấp 1.
-    for (const item of rootItems) {
-        const itemPath =
-            `${hoSoPath}/${item.name}`;
-
-        if (
-            item.type ===
-            FileType.Directory
-        ) {
-            branchPaths.push(
-                itemPath,
-            );
-
-            continue;
-        }
-
-        if (
-            item.type !==
-            FileType.File
-        ) {
-            continue;
-        }
-
-        const lowerName =
-            item.name.toLowerCase();
-
-        if (
-            lowerName.endsWith(".xlsx") ||
-            lowerName.endsWith(".xlsm")
-        ) {
-            rootResult.excelFiles.push({
-                path: itemPath,
-                fileName: item.name,
-                size: item.size,
-                modifiedAt:
-                    item.modifiedAt,
-            });
-
-            continue;
-        }
-
-        const resourceInfo =
-            getResourceInfo(
-                item.name,
-            );
-
-        if (!resourceInfo) {
-            continue;
-        }
-
-        if (
-            !stationByCode.has(
-                resourceInfo.stationCode.toUpperCase(),
-            )
-        ) {
-            continue;
-        }
-
-        rootResult.resourceUpdates.push({
-            stationCode:
-                resourceInfo.stationCode,
-            resourceType:
-                resourceInfo.resourceType,
-            resource:
+            result[resourceInfo.resourceType] =
                 createFoundResource(
                     item,
                     itemPath,
-                ),
-        });
-    }
-
-    // Các nhánh cấp 1 được scan song song.
-    // Mỗi worker dùng một FTP connection riêng.
-    const branchResults:
-        DocumentScanResult[] =
-        new Array(
-            branchPaths.length,
-        );
-
-    const concurrency = Math.min(
-        4,
-        branchPaths.length,
-    );
-
-    let nextBranchIndex = 0;
-
-    async function branchWorker():
-        Promise<void> {
-        const branchClient =
-            await connectFtp();
-
-        try {
-            while (true) {
-                const index =
-                    nextBranchIndex++;
-
-                if (
-                    index >=
-                    branchPaths.length
-                ) {
-                    return;
-                }
-
-                branchResults[index] =
-                    await scanFolder(
-                        branchClient,
-                        branchPaths[index],
-                    );
-            }
-        } finally {
-            branchClient.close();
+                );
         }
     }
 
-    const workers =
-        Array.from(
-            {
-                length: concurrency,
-            },
-            () => branchWorker(),
-        );
-
-    await Promise.all(
-        workers,
+    await scanFolder(
+        hoSoPath,
     );
-
-    const excelFiles:
-        ExcelFtpFile[] = [
-        ...rootResult.excelFiles,
-    ];
-
-    const resourceUpdates:
-        DocumentResourceUpdate[] = [
-        ...rootResult.resourceUpdates,
-    ];
-
-    // Merge theo đúng thứ tự branchPaths,
-    // không phụ thuộc worker nào hoàn thành trước.
-    for (
-        const branchResult
-        of branchResults
-    ) {
-        excelFiles.push(
-            ...branchResult.excelFiles,
-        );
-
-        resourceUpdates.push(
-            ...branchResult.resourceUpdates,
-        );
-    }
-
-    // Chỉ cập nhật stationResults sau khi
-    // toàn bộ FTP branch đã scan xong.
-    for (
-        const update
-        of resourceUpdates
-    ) {
-        const result =
-            stationByCode.get(
-                update.stationCode.toUpperCase(),
-            );
-
-        if (!result) {
-            continue;
-        }
-
-        result[update.resourceType] =
-            update.resource;
-    }
 
     console.log(
         "[FTP Documents LIST]",
