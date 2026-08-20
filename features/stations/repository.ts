@@ -101,6 +101,178 @@ export async function getStationsByProject(
     }));
 }
 
+export async function getProjectsPdfProgress(
+    projectIds: string[],
+): Promise<Record<string, number>> {
+
+    if (projectIds.length === 0) {
+        return {};
+    }
+
+    const {
+        data: stations,
+        error: stationsError,
+    } = await supabase
+        .from("stations")
+        .select(
+            "id, project_id",
+        )
+        .in(
+            "project_id",
+            projectIds,
+        )
+        .eq(
+            "is_removed",
+            false,
+        );
+
+    if (stationsError) {
+        throw stationsError;
+    }
+
+    const totalByProject:
+        Record<string, number> = {};
+
+    const stationIds: string[] = [];
+
+    for (
+        const station
+        of stations ?? []
+    ) {
+        totalByProject[
+            station.project_id
+        ] =
+            (totalByProject[
+                station.project_id
+            ] ?? 0) + 1;
+
+        stationIds.push(
+            station.id,
+        );
+    }
+
+    const pdfFoundByProject:
+        Record<string, number> = {};
+
+    if (
+        stationIds.length > 0
+    ) {
+        const stationProjectMap =
+            new Map<
+                string,
+                string
+            >();
+
+        for (
+            const station
+            of stations ?? []
+        ) {
+            stationProjectMap.set(
+                station.id,
+                station.project_id,
+            );
+        }
+
+        const RESOURCE_BATCH_SIZE =
+            200;
+
+        for (
+            let start = 0;
+            start < stationIds.length;
+            start += RESOURCE_BATCH_SIZE
+        ) {
+            const batchIds =
+                stationIds.slice(
+                    start,
+                    start +
+                        RESOURCE_BATCH_SIZE,
+                );
+
+            const {
+                data: pdfResources,
+                error: pdfError,
+            } = await supabase
+                .from(
+                    "station_resources",
+                )
+                .select(
+                    "station_id",
+                )
+                .in(
+                    "station_id",
+                    batchIds,
+                )
+                .eq(
+                    "resource_type",
+                    "pdf",
+                )
+                .eq(
+                    "status",
+                    "FOUND",
+                );
+
+            if (pdfError) {
+                throw pdfError;
+            }
+
+            for (
+                const resource
+                of pdfResources ?? []
+            ) {
+                const projectId =
+                    stationProjectMap.get(
+                        resource.station_id,
+                    );
+
+                if (!projectId) {
+                    continue;
+                }
+
+                pdfFoundByProject[
+                    projectId
+                ] =
+                    (
+                        pdfFoundByProject[
+                            projectId
+                        ] ?? 0
+                    ) + 1;
+            }
+        }
+    }
+
+    const progressByProject:
+        Record<string, number> = {};
+
+    for (
+        const projectId
+        of projectIds
+    ) {
+        const total =
+            totalByProject[
+                projectId
+            ] ?? 0;
+
+        const pdfFound =
+            pdfFoundByProject[
+                projectId
+            ] ?? 0;
+
+        progressByProject[
+            projectId
+        ] =
+            total > 0
+                ? Math.round(
+                    (
+                        pdfFound /
+                        total
+                    ) * 100,
+                )
+                : 0;
+    }
+
+    return progressByProject;
+}
+
 export async function getStationScanInputsByProject(
     projectId: string,
 ): Promise<

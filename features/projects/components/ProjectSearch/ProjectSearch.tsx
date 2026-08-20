@@ -55,6 +55,7 @@ export default function ProjectSearch() {
                 projectName: item.project.name,
                 customer: item.project.customer,
                 year: item.project.year,
+                stationId: item.id,
                 stationCode: item.code,
                 stationAddress: item.address,
             }));

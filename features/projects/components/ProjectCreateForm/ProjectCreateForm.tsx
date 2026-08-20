@@ -20,6 +20,16 @@ export default function ProjectCreateForm() {
 
     const router = useRouter();
 
+    function handleReset() {
+        setForm({
+            code: "",
+            name: "",
+            customer: "",
+            year: new Date().getFullYear().toString(),
+            description: "",
+        });
+    }
+
     async function handleCreateProject() {
 
         if (!form.code.trim()) {
@@ -254,8 +264,10 @@ export default function ProjectCreateForm() {
                     }}
                 >
                     <Button
+                        type="button"
                         variant="secondary"
                         size="lg"
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>

@@ -15,10 +15,16 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 type Props = {
     projects: Project[];
+
+    progressByProject: Record<
+        string,
+        number
+    >;
 };
 
 export default function ProjectHome({
     projects,
+    progressByProject,
 }: Props) {
     const router = useRouter();
     const [editingProject, setEditingProject] =
@@ -87,6 +93,7 @@ export default function ProjectHome({
                 left={
                     <ProjectLeftPanel
                         projects={projects}
+                        progressByProject={progressByProject}
                         onEdit={(project) => {
                             setEditingProject(project);
                         }}

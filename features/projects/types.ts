@@ -55,6 +55,8 @@ export interface ProjectSearchResult {
 
     year: number;
 
+    stationId: string;
+
     stationCode: string;
 
     stationAddress: string;

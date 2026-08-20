@@ -12,49 +12,51 @@ export default function ProjectSearchResultCard({
     onClick,
 }: Props) {
     return (
-        <Link
-            href={`/projects/${item.projectId}`}
+        <div
             style={{
-                textDecoration: "none",
+                borderBottom: "1px solid #E5E7EB",
+                background: "#FFFFFF",
+                transition: "all .2s ease",
             }}
         >
-            <div
+            <Link
+                href={`/projects/${item.projectId}`}
                 onClick={onClick}
                 style={{
+                    display: "block",
                     padding: "16px 18px",
-                    borderBottom: "1px solid #E5E7EB",
-                    cursor: "pointer",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    background: "#FFFFFF",
-                    transition: "all .2s ease",
+                    textDecoration: "none",
+                    color: "inherit",
                 }}
             >
-                <>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
                     <div>
-                        <>
-                            <div
-                                style={{
-                                    fontSize: 12,
-                                    color: "#64748B",
-                                    fontWeight: 600,
-                                }}
-                            >
-                                {item.projectCode}
-                            </div>
+                        <div
+                            style={{
+                                fontSize: 12,
+                                color: "#64748B",
+                                fontWeight: 600,
+                            }}
+                        >
+                            {item.projectCode}
+                        </div>
 
-                            <div
-                                style={{
-                                    marginTop: 2,
-                                    fontWeight: 700,
-                                    color: "#111827",
-                                    fontSize: 15,
-                                }}
-                            >
-                                {item.projectName}
-                            </div>
-                        </>
+                        <div
+                            style={{
+                                marginTop: 2,
+                                fontWeight: 700,
+                                color: "#111827",
+                                fontSize: 15,
+                            }}
+                        >
+                            {item.projectName}
+                        </div>
 
                         <div
                             style={{
@@ -64,16 +66,6 @@ export default function ProjectSearchResultCard({
                             }}
                         >
                             Customer • {item.customer}
-                        </div>
-
-                        <div
-                            style={{
-                                marginTop: 6,
-                                color: "#2563EB",
-                                fontSize: 13,
-                            }}
-                        >
-                            Station • {item.stationCode}
                         </div>
                     </div>
 
@@ -105,8 +97,21 @@ export default function ProjectSearchResultCard({
                             Active
                         </div>
                     </div>
-                </>
-            </div>
-        </Link>
+                </div>
+            </Link>
+
+            <Link
+                href={`/stations/${item.stationId}`}
+                style={{
+                    display: "block",
+                    padding: "0 18px 16px 18px",
+                    color: "#2563EB",
+                    fontSize: 13,
+                    textDecoration: "none",
+                }}
+            >
+                Station • {item.stationCode}
+            </Link>
+        </div>
     );
 }

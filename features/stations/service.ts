@@ -20,6 +20,7 @@ import {
     getProjectFtpResources,
     getLatestProjectFtpScan,
     getProjectFtpScanHistory,
+    getProjectsPdfProgress,
 } from "./repository";
 
 export async function loadStations(
@@ -27,6 +28,16 @@ export async function loadStations(
 ): Promise<Station[]> {
 
     return getStationsByProject(projectId);
+
+}
+
+export async function loadProjectsPdfProgress(
+    projectIds: string[],
+): Promise<Record<string, number>> {
+
+    return getProjectsPdfProgress(
+        projectIds,
+    );
 
 }
 

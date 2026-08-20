@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 
 type Props = {
     projects: Project[];
+
+    progressByProject: Record<
+        string,
+        number
+    >;
+
     onEdit: (project: Project) => void;
+
     onDelete: (project: Project) => void;
 };
 
 export default function ProjectLeftPanel({
     projects,
+    progressByProject,
     onEdit,
     onDelete,
 }: Props) {
@@ -60,7 +68,11 @@ export default function ProjectLeftPanel({
                         customer={project.customer ?? ""}
                         year={project.year}
                         status={project.status}
-                        progress={0}
+                        progress={
+                            progressByProject[
+                                project.id
+                            ] ?? 0
+                        }
                         onClick={() => router.push(`/projects/${project.id}`)}
                         onEdit={() => onEdit(project)}
                         onDelete={() => onDelete(project)}
