@@ -430,6 +430,8 @@ export default function StationFtpResources({
             status: survey.status,
             fileName:
                 survey.fileName ?? "-",
+            path:
+                survey.path ?? "-",
             size: formatFileSize(survey.size),
             updated: formatDate(
                 survey.modifiedAt,
@@ -440,6 +442,8 @@ export default function StationFtpResources({
             status: word.status,
             fileName:
                 word.fileName ?? "-",
+            path:
+                word.path ?? "-",
             size: formatFileSize(word.size),
             updated: formatDate(
                 word.modifiedAt,
@@ -450,6 +454,8 @@ export default function StationFtpResources({
             status: visio.status,
             fileName:
                 visio.fileName ?? "-",
+            path:
+                visio.path ?? "-",
             size: formatFileSize(visio.size),
             updated: formatDate(
                 visio.modifiedAt,
@@ -460,6 +466,8 @@ export default function StationFtpResources({
             status: pdf.status,
             fileName:
                 pdf.fileName ?? "-",
+            path:
+                pdf.path ?? "-",
             size: formatFileSize(pdf.size),
             updated: formatDate(
                 pdf.modifiedAt,
@@ -503,6 +511,10 @@ export default function StationFtpResources({
             <div
                 style={{
                     marginBottom: 12,
+                    padding: "16px 20px",
+                    borderRadius: 12,
+                    background: "#1E3A8A",
+                    color: "#FFFFFF",
                 }}
             >
                 <div
@@ -527,7 +539,7 @@ export default function StationFtpResources({
 
                         <div
                             style={{
-                                color: "#64748b",
+                                color: "#DBEAFE",
                                 fontSize: 14,
                             }}
                         >

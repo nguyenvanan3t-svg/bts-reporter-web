@@ -27,9 +27,6 @@ export default async function StationDetailPage({
         await loadFtpResources(station.id);
 
     const stationStatus =
-        ftpResources.survey.status === "FOUND" &&
-        ftpResources.word.status === "FOUND" &&
-        ftpResources.visio.status === "FOUND" &&
         ftpResources.pdf.status === "FOUND"
             ? "COMPLETED"
             : "PENDING";
@@ -120,20 +117,6 @@ export default async function StationDetailPage({
                     }}
                 >
                     Station ID: {station.code}
-                </div>
-
-                <div
-                    style={{
-                        marginTop: 14,
-                        color: "#64748b",
-                        fontSize: 15,
-                        lineHeight: 1.6,
-                        maxWidth: 720,
-                    }}
-                >
-                    Monitor survey progress and engineering documents stored on the FTP
-                    server. Download existing resources or upload updated files for this
-                    station.
                 </div>
 
             </div>

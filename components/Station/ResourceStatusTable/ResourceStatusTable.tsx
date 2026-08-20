@@ -2,6 +2,7 @@ type ResourceItem = {
     resource: string;
     status: "FOUND" | "MISSING";
     fileName: string;
+    path: string;
     size: string;
     updated: string;
 };
@@ -25,15 +26,16 @@ export default function ResourceStatusTable({
         >
             <div
                 style={{
-                    padding: "20px 24px",
-                    borderBottom: "1px solid #E5E7EB",
+                    padding: "16px 24px",
+                    background: "#1E3A8A",
+                    color: "#FFFFFF",
                 }}
             >
                 <div
                     style={{
                         fontSize: 22,
                         fontWeight: 700,
-                        color: "#111827",
+                        color: "#FFFFFF",
                     }}
                 >
                     Resource Status
@@ -43,7 +45,7 @@ export default function ResourceStatusTable({
                     style={{
                         marginTop: 6,
                         fontSize: 14,
-                        color: "#64748B",
+                        color: "#DBEAFE",
                     }}
                 >
                     Latest resource scan result from FTP server.
@@ -65,7 +67,7 @@ export default function ResourceStatusTable({
                         <th
                             style={{
                                 ...thStyle,
-                                width: "15%",
+                                width: "10%",
                             }}
                         >
                             Resource
@@ -73,7 +75,7 @@ export default function ResourceStatusTable({
                         <th
                             style={{
                                 ...thStyle,
-                                width: "15%",
+                                width: "10%",
                             }}
                         >
                             Status
@@ -81,15 +83,24 @@ export default function ResourceStatusTable({
                         <th
                             style={{
                                 ...thStyle,
-                                width: "40%",
+                                width: "30%",
                             }}
                         >
                             File name
                         </th>
+
                         <th
                             style={{
                                 ...thStyle,
-                                width: "15%",
+                                width: "30%",
+                            }}
+                        >
+                            Path (FTP)
+                        </th>
+                        <th
+                            style={{
+                                ...thStyle,
+                                width: "10%",
                             }}
                         >
                             Size
@@ -97,7 +108,7 @@ export default function ResourceStatusTable({
                         <th
                             style={{
                                 ...thStyle,
-                                width: "15%",
+                                width: "10%",
                             }}
                         >
                             Updated
@@ -156,6 +167,20 @@ export default function ResourceStatusTable({
                                 }}
                             >
                                 {item.fileName}
+                            </td>
+
+                            <td
+                                style={{
+                                    ...tdStyle,
+                                    color:
+                                        item.path === "-"
+                                            ? "#94A3B8"
+                                            : "#475569",
+                                    fontSize: 13,
+                                    wordBreak: "break-all",
+                                }}
+                            >
+                                {item.path}
                             </td>
 
                             <td style={tdStyle}>

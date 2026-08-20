@@ -46,16 +46,18 @@ export default function StationInformation({
 
         <div>
 
-            <h3
+            <div
                 style={{
-                    marginTop: 0,
-                    marginBottom: 20,
-                    color: "#0f172a",
+                    margin: "-16px -16px 16px -16px",
+                    padding: "14px 16px",
+                    background: "#1E3A8A",
+                    color: "#FFFFFF",
                     fontWeight: 700,
+                    fontSize: 16,
                 }}
             >
-                Station Overview
-            </h3>
+                Station Information
+            </div>
 
             <div
                 style={{
@@ -166,20 +168,27 @@ export default function StationInformation({
                         </td>
 
                         <td>
-
                             <span
                                 style={{
+                                    display: "inline-block",
                                     padding: "4px 10px",
                                     borderRadius: 999,
-                                    background: "#FEF3C7",
-                                    color: "#92400E",
+                                    background:
+                                        status === "COMPLETED"
+                                            ? "#DCFCE7"
+                                            : "#FEF3C7",
+                                    color:
+                                        status === "COMPLETED"
+                                            ? "#15803D"
+                                            : "#92400E",
                                     fontSize: 12,
                                     fontWeight: 600,
                                 }}
                             >
-                                {status}
+                                {status === "COMPLETED"
+                                    ? "Complete"
+                                    : "Pending"}
                             </span>
-
                         </td>
 
                     </tr>
