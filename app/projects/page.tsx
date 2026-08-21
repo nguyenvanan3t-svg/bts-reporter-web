@@ -5,6 +5,7 @@ import ProjectHome from "@/features/projects/components/ProjectHome";
 import {
     loadProjectsPdfProgress,
 } from "@/features/stations/service";
+export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
     const projects =
