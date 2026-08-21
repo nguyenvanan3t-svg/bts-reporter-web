@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function ProjectCreateForm() {
-
     const [form, setForm] = useState({
         code: "",
         name: "",
@@ -31,25 +30,17 @@ export default function ProjectCreateForm() {
     }
 
     async function handleCreateProject() {
-
         if (!form.code.trim()) {
-
             toast.warning("Project code is required.");
-
             return;
-
         }
 
         if (!form.name.trim()) {
-
             toast.warning("Project name is required.");
-
             return;
-
         }
 
         try {
-
             setIsCreating(true);
 
             await projectService.create({
@@ -60,72 +51,69 @@ export default function ProjectCreateForm() {
                 description: form.description,
             });
 
-            setForm({
-                code: "",
-                name: "",
-                customer: "",
-                year: new Date().getFullYear().toString(),
-                description: "",
-            });
+            handleReset();
 
-            toast.success("Project created successfully.");
+            toast.success(
+                "Project created successfully.",
+            );
 
             router.refresh();
-
         } catch (error) {
-
             console.error(error);
+
             if (error instanceof Error) {
                 console.log(error.message);
             }
 
             if (
                 error instanceof Error &&
-                error.message === "PROJECT_CODE_EXISTS"
+                error.message ===
+                    "PROJECT_CODE_EXISTS"
             ) {
-
-                toast.error("Project code already exists.");
-
+                toast.error(
+                    "Project code already exists.",
+                );
             } else if (
                 error instanceof Error &&
-                error.message === "PROJECT_NAME_EXISTS"
+                error.message ===
+                    "PROJECT_NAME_EXISTS"
             ) {
-
-                toast.error("Project name already exists.");
-
+                toast.error(
+                    "Project name already exists.",
+                );
             } else {
-
-                toast.error("Failed to create project.");
-
+                toast.error(
+                    "Failed to create project.",
+                );
             }
-
         } finally {
-
             setIsCreating(false);
-
         }
     }
 
     return (
-        <div
+        <section
             style={{
                 background: "#FFFFFF",
-                border: "1px solid #E5E7EB",
-                borderRadius: 18,
-                padding: 24,
-                boxShadow: "0 6px 18px rgba(15,23,42,.05)",
+                border: "1px solid #E2E8F0",
+                borderRadius: 16,
+                padding: 16,
+                boxShadow:
+                    "0 8px 24px rgba(15,23,42,.06)",
             }}
         >
             <div
                 style={{
-                    marginBottom: 26,
+                    marginBottom: 10,
                 }}
             >
                 <div
                     style={{
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: "#111827",
+                        fontSize: 21,
+                        fontWeight: 750,
+                        lineHeight: 1.15,
+                        color: "#102A56",
+                        letterSpacing: "-0.02em",
                     }}
                 >
                     Create New Project
@@ -133,13 +121,13 @@ export default function ProjectCreateForm() {
 
                 <div
                     style={{
-                        marginTop: 6,
-                        fontSize: 14,
+                        marginTop: 5,
+                        fontSize: 12,
+                        lineHeight: 1.4,
                         color: "#64748B",
-                        lineHeight: 1.6,
                     }}
                 >
-                    Create a new survey project. Project information can be edited later if needed.
+                    Project information can be edited later if needed.
                 </div>
             </div>
 
@@ -147,120 +135,106 @@ export default function ProjectCreateForm() {
                 style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: 18,
+                    gap: 7,
                 }}
             >
-                <div>
-                    <div style={labelStyle}>
-                        Project Code *
-                    </div>
+                <Field
+                    label="Project Code *"
+                    placeholder="Enter project code"
+                    value={form.code}
+                    onChange={(value) =>
+                        setForm({
+                            ...form,
+                            code: value,
+                        })
+                    }
+                />
 
-                    <input
-                        placeholder="Enter project code"
-                        value={form.code}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                code: e.target.value,
-                            })
-                        }
-                        style={inputStyle}
-                    />
-                </div>
+                <Field
+                    label="Project Name *"
+                    placeholder="Enter project name"
+                    value={form.name}
+                    onChange={(value) =>
+                        setForm({
+                            ...form,
+                            name: value,
+                        })
+                    }
+                />
 
-                <div>
-                    <div style={labelStyle}>
-                        Project Name *
-                    </div>
+                <Field
+                    label="Customer"
+                    placeholder="Enter customer"
+                    value={form.customer}
+                    onChange={(value) =>
+                        setForm({
+                            ...form,
+                            customer: value,
+                        })
+                    }
+                />
 
-                    <input
-                        placeholder="Enter project name"
-                        value={form.name}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                name: e.target.value,
-                            })
-                        }
-                        style={inputStyle}
-                    />
-                </div>
-
-                <div>
-                    <div style={labelStyle}>
-                        Customer
-                    </div>
-
-                    <input
-                        placeholder="Enter customer"
-                        value={form.customer}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                customer: e.target.value,
-                            })
-                        }
-                        style={inputStyle}
-                    />
-                </div>
-
-                <div>
-                    <div style={labelStyle}>
-                        Year
-                    </div>
-
-                    <input
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "0.8fr 1.2fr",
+                        gap: 10,
+                    }}
+                >
+                    <Field
+                        label="Year"
                         type="number"
                         placeholder="2026"
                         value={form.year}
-                        onChange={(e) =>
+                        onChange={(value) =>
                             setForm({
                                 ...form,
-                                year: e.target.value,
+                                year: value,
                             })
                         }
-                        style={inputStyle}
                     />
-                </div>
 
-                <div>
-                    <div style={labelStyle}>
-                        Description
+                    <div>
+                        <div style={labelStyle}>
+                            Description
+                        </div>
+
+                        <textarea
+                            placeholder="Description"
+                            rows={1}
+                            value={form.description}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    description:
+                                        e.target.value,
+                                })
+                            }
+                            style={{
+                                ...inputStyle,
+                                height: 44,
+                                padding: "0 13px",
+                                resize: "none",
+                            }}
+                        />
                     </div>
-
-                    <textarea
-                        placeholder="Description"
-                        rows={4}
-                        value={form.description}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                description: e.target.value,
-                            })
-                        }
-                        style={{
-                            ...inputStyle,
-                            resize: "none",
-                            height: 120,
-                            paddingTop: 14,
-                        }}
-                    />
                 </div>
 
                 <div
                     style={{
                         height: 1,
                         background: "#E2E8F0",
-                        margin: "6px 0 2px",
+                        margin: "3px 0 1px",
                     }}
                 />
 
                 <div
                     style={{
                         display: "flex",
-                        justifyContent: "flex-end",
-                        gap: 12,
-                        marginTop: 18,
+                        justifyContent:
+                            "flex-end",
+                        gap: 8,
+                        marginTop: 0,
                     }}
                 >
                     <Button
@@ -276,29 +250,67 @@ export default function ProjectCreateForm() {
                         type="button"
                         variant="primary"
                         size="lg"
-                        onClick={handleCreateProject}
+                        onClick={
+                            handleCreateProject
+                        }
                         disabled={isCreating}
                     >
-                        {isCreating ? "Creating..." : "Create Project"}
+                        {isCreating
+                            ? "Creating..."
+                            : "Create Project"}
                     </Button>
                 </div>
             </div>
+        </section>
+    );
+}
+
+function Field({
+    label,
+    placeholder,
+    value,
+    onChange,
+    type = "text",
+}: {
+    label: string;
+    placeholder: string;
+    value: string;
+    onChange: (value: string) => void;
+    type?: string;
+}) {
+    return (
+        <div>
+            <div style={labelStyle}>{label}</div>
+
+            <input
+                type={type}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) =>
+                    onChange(e.target.value)
+                }
+                style={inputStyle}
+            />
         </div>
     );
 }
 
 const labelStyle: React.CSSProperties = {
-    marginBottom: 6,
-    fontSize: 13,
-    fontWeight: 600,
+    marginBottom: 4,
+    fontSize: 12,
+    fontWeight: 650,
     color: "#334155",
 };
+
 const inputStyle: React.CSSProperties = {
     width: "100%",
-    height: 46,
-    padding: "0 14px",
-    borderRadius: 10,
+    height: 40,
+    padding: "0 12px",
+    borderRadius: 8,
     border: "1px solid #CBD5E1",
-    fontSize: 14,
+    fontSize: 13,
+    color: "#111827",
+    background: "#FFFFFF",
     boxSizing: "border-box",
+    outline: "none",
 };

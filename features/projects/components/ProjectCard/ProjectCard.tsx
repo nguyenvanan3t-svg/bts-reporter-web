@@ -45,7 +45,7 @@ export default function ProjectCard({
         >
             <div
                 style={{
-                    padding: "12px 14px",
+                    padding: "9px 12px",
                     background: "#1E3A8A",
                     color: "#FFFFFF",
                     display: "flex",
@@ -55,9 +55,9 @@ export default function ProjectCard({
             >
                 <div
                     style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: 10,
+                        width: 30,
+                        height: 30,
+                        borderRadius: 9,
                         background: "rgba(255,255,255,.16)",
                         display: "flex",
                         justifyContent: "center",
@@ -78,7 +78,7 @@ export default function ProjectCard({
                 >
                     <div
                         style={{
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: 700,
                             color: "#FFFFFF",
                         }}
@@ -88,9 +88,9 @@ export default function ProjectCard({
 
                     <div
                         style={{
-                            marginTop: 2,
+                            marginTop: 1,
                             color: "#DBEAFE",
-                            fontSize: 13,
+                            fontSize: 12,
                         }}
                     >
                         {customer}
@@ -100,7 +100,7 @@ export default function ProjectCard({
 
             <div
                 style={{
-                    padding: "10px 12px 12px",
+                    padding: "8px 10px 9px",
                 }}
             >
                 <div
@@ -133,8 +133,8 @@ export default function ProjectCard({
 
                 <div
                     style={{
-                        marginTop: 6,
-                        height: 6,
+                        marginTop: 5,
+                        height: 5,
                         borderRadius: 999,
                         background: "#E2E8F0",
                         overflow: "hidden",
@@ -153,7 +153,7 @@ export default function ProjectCard({
                 {(onEdit || onDelete) && (
                     <div
                         style={{
-                            marginTop: 12,
+                            marginTop: 9,
                             display: "flex",
                             justifyContent: "flex-end",
                             gap: 8,
@@ -171,8 +171,8 @@ export default function ProjectCard({
                                     background: "#FFFFFF",
                                     color: "#334155",
                                     borderRadius: 8,
-                                    padding: "6px 12px",
-                                    fontSize: 13,
+                                    padding: "5px 10px",
+                                    fontSize: 12,
                                     fontWeight: 600,
                                     cursor: "pointer",
                                 }}
@@ -193,8 +193,8 @@ export default function ProjectCard({
                                     background: "#FFFFFF",
                                     color: "#DC2626",
                                     borderRadius: 8,
-                                    padding: "6px 12px",
-                                    fontSize: 13,
+                                    padding: "5px 10px",
+                                    fontSize: 12,
                                     fontWeight: 600,
                                     cursor: "pointer",
                                 }}

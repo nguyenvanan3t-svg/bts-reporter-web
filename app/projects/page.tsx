@@ -5,6 +5,7 @@ import ProjectHome from "@/features/projects/components/ProjectHome";
 import {
     loadProjectsPdfProgress,
 } from "@/features/stations/service";
+
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
@@ -14,28 +15,40 @@ export default async function ProjectsPage() {
     const progressByProject =
         await loadProjectsPdfProgress(
             projects.map(
-                (project) =>
-                    project.id,
+                (project) => project.id,
             ),
         );
 
     return (
-        <div
-          style={{
-              position: "relative",
-              overflow: "hidden",
-          }}
+        <main
+            style={{
+                minHeight: "100vh",
+                background: "#F8FAFC",
+            }}
         >
-            <ProjectDashboardHeader />
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: 1380,
+                    margin: "0 auto",
+                    padding:
+                        "20px 32px 48px",
+                    boxSizing: "border-box",
+                }}
+            >
+                <ProjectDashboardHeader
+                    totalProjects={projects.length}
+                />
 
-            <ProjectSearch />
+                <ProjectSearch />
 
-            <ProjectHome
-                projects={projects}
-                progressByProject={
-                    progressByProject
-                }
-            />
-      </div>
+                <ProjectHome
+                    projects={projects}
+                    progressByProject={
+                        progressByProject
+                    }
+                />
+            </div>
+        </main>
     );
 }

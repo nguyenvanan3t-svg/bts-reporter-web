@@ -11,14 +11,28 @@ export default function ProjectDashboard({
         <div
             style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr",
-                gap: 24,
+                gridTemplateColumns:
+                    "minmax(0, 1.9fr) minmax(360px, 0.9fr)",
+                gap: 20,
                 alignItems: "start",
             }}
         >
-            <div>{left}</div>
+            <div
+                style={{
+                    minWidth: 0,
+                    padding: "4px 0",
+                }}
+            >
+                {left}
+            </div>
 
-            <div>{right}</div>
+            <div
+                style={{
+                    minWidth: 0,
+                }}
+            >
+                {right}
+            </div>
         </div>
     );
 }

@@ -102,19 +102,19 @@ export default function ProjectEditForm({
             style={{
                 background: "#FFFFFF",
                 border: "1px solid #E5E7EB",
-                borderRadius: 18,
-                padding: 24,
+                borderRadius: 16,
+                padding: 12,
                 boxShadow: "0 6px 18px rgba(15,23,42,.05)",
             }}
         >
             <div
                 style={{
-                    marginBottom: 26,
+                    marginBottom: 10,
                 }}
             >
                 <div
                     style={{
-                        fontSize: 28,
+                        fontSize: 20,
                         fontWeight: 700,
                         color: "#111827",
                     }}
@@ -124,14 +124,13 @@ export default function ProjectEditForm({
 
                 <div
                     style={{
-                        marginTop: 6,
-                        fontSize: 14,
+                        marginTop: 4,
+                        fontSize: 12,
                         color: "#64748B",
-                        lineHeight: 1.6,
+                        lineHeight: 1.2,
                     }}
                 >
-                    Update project information. All project fields can be
-                    modified.
+                    All project fields can bemodified.
                 </div>
             </div>
 
@@ -139,7 +138,7 @@ export default function ProjectEditForm({
                 style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: 18,
+                    gap: 2,
                 }}
             >
                 <div>
@@ -196,52 +195,60 @@ export default function ProjectEditForm({
                     />
                 </div>
 
-                <div>
-                    <div style={labelStyle}>
-                        Year
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+                        gap: 12,
+                    }}
+                >
+                    <div>
+                        <div style={labelStyle}>
+                            Year
+                        </div>
+
+                        <input
+                            type="number"
+                            placeholder="2026"
+                            value={form.year}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    year: e.target.value,
+                                })
+                            }
+                            style={inputStyle}
+                        />
                     </div>
 
-                    <input
-                        type="number"
-                        placeholder="2026"
-                        value={form.year}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                year: e.target.value,
-                            })
-                        }
-                        style={inputStyle}
-                    />
-                </div>
+                    <div>
+                        <div style={labelStyle}>
+                            Status
+                        </div>
 
-                <div>
-                    <div style={labelStyle}>
-                        Status
+                        <select
+                            value={form.status}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    status: e.target.value as ProjectStatus,
+                                })
+                            }
+                            style={inputStyle}
+                        >
+                            <option value="PLANNING">
+                                Planning
+                            </option>
+
+                            <option value="ACTIVE">
+                                Active
+                            </option>
+
+                            <option value="ARCHIVED">
+                                Archived
+                            </option>
+                        </select>
                     </div>
-
-                    <select
-                        value={form.status}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                status: e.target.value as ProjectStatus,
-                            })
-                        }
-                        style={inputStyle}
-                    >
-                        <option value="PLANNING">
-                            Planning
-                        </option>
-
-                        <option value="ACTIVE">
-                            Active
-                        </option>
-
-                        <option value="ARCHIVED">
-                            Archived
-                        </option>
-                    </select>
                 </div>
 
                 <div>
@@ -251,7 +258,7 @@ export default function ProjectEditForm({
 
                     <textarea
                         placeholder="Description"
-                        rows={4}
+                        rows={3}
                         value={form.description}
                         onChange={(e) =>
                             setForm({
@@ -262,8 +269,8 @@ export default function ProjectEditForm({
                         style={{
                             ...inputStyle,
                             resize: "none",
-                            height: 120,
-                            paddingTop: 14,
+                            height: 60,
+                            paddingTop: 8,
                         }}
                     />
                 </div>
@@ -280,8 +287,8 @@ export default function ProjectEditForm({
                     style={{
                         display: "flex",
                         justifyContent: "flex-end",
-                        gap: 12,
-                        marginTop: 18,
+                        gap: 8,
+                        marginTop: 8,
                     }}
                 >
                     <Button
@@ -312,19 +319,19 @@ export default function ProjectEditForm({
 }
 
 const labelStyle: React.CSSProperties = {
-    marginBottom: 6,
-    fontSize: 13,
+    marginBottom: 4,
+    fontSize: 12,
     fontWeight: 600,
     color: "#334155",
 };
 
 const inputStyle: React.CSSProperties = {
     width: "100%",
-    height: 46,
-    padding: "0 14px",
+    height: 40,
+    padding: "0 12px",
     borderRadius: 10,
     border: "1px solid #CBD5E1",
-    fontSize: 14,
+    fontSize: 13,
     boxSizing: "border-box",
     background: "#FFFFFF",
     color: "#111827",
