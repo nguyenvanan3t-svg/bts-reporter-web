@@ -26,42 +26,62 @@ export function ResourceCard({
     downloadDisabled = false,
     uploadDisabled = false,
 }: Props) {
+    const displayFileName = fileName
+        ? fileName.replace(/_/g, "_\u200B")
+        : "-";
+
     return (
         <div
             style={{
-                border: "1px solid #E5E7EB",
-                borderRadius: 12,
-                padding: 16,
-                background: "#FFF",
+                border: "1px solid #E2E8F0",
+                borderRadius: 9,
+                padding: "10px 11px",
+                background: "#FFFFFF",
                 display: "flex",
                 flexDirection: "column",
-                gap: 10,
-                minHeight: 160,
+                boxSizing: "border-box",
+                height: 124,
+                minWidth: 0,
+                boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
             }}
         >
+            {/* Title + status cùng một hàng */}
             <div
                 style={{
-                    fontWeight: 700,
-                    fontSize: 16,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    minWidth: 0,
                 }}
             >
-                {title}
-            </div>
+                <div
+                    style={{
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        lineHeight: 1.2,
+                        color: "#0F172A",
+                    }}
+                >
+                    {title}
+                </div>
 
-            <div>
                 <span
                     style={{
-                        display: "inline-block",
-                        padding: "4px 12px",
+                        flexShrink: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        padding: "3px 8px",
                         borderRadius: 999,
-                        fontSize: 12,
+                        fontSize: 9.5,
                         fontWeight: 700,
-                        background: found
-                            ? "#DCFCE7"
-                            : "#FEE2E2",
-                        color: found
-                            ? "#15803D"
-                            : "#B91C1C",
+                        lineHeight: 1.2,
+                        background: found ? "#DCFCE7" : "#FEE2E2",
+                        color: found ? "#15803D" : "#B91C1C",
                     }}
                 >
                     {found ? "FOUND" : "MISSING"}
@@ -70,60 +90,54 @@ export function ResourceCard({
 
             <div
                 style={{
-                    color: "#6B7280",
-                    minHeight: 20,
-                    fontSize: 12,
-                    lineHeight: "18px",
-                    wordBreak: "break-all",
+                    marginTop: 8,
+                    color: "#64748B",
+                    height: 30,
+                    fontSize: 10.5,
+                    lineHeight: 1.4,
+                    whiteSpace: "normal",
+                    wordBreak: "normal",
+                    overflowWrap: "break-word",
+                    overflow: "hidden",
                 }}
             >
-                {fileName ?? "-"}
+                {displayFileName}
             </div>
 
             <div
                 style={{
+                    marginTop: "auto",
                     borderTop: "1px solid #F1F5F9",
-                    marginTop: "auto",
-                    paddingTop: 12,
-                }}
-            />
-
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "auto",
+                    paddingTop: 5,
                 }}
             >
-                <IconButton
-                    title={
-                        downloadLoading
-                            ? "Downloading..."
-                            : "Download"
-                    }
-                    icon={<Download size={18} />}
-                    onClick={
-                        downloadDisabled ||
-                        downloadLoading
-                            ? undefined
-                            : onDownload
-                    }
-                />
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <IconButton
+                        title={downloadLoading ? "Downloading..." : "Download"}
+                        icon={<Download size={15} />}
+                        onClick={
+                            downloadDisabled || downloadLoading
+                                ? undefined
+                                : onDownload
+                        }
+                    />
 
-                <IconButton
-                    title={
-                        uploadLoading
-                            ? "Uploading..."
-                            : "Upload"
-                    }
-                    icon={<Upload size={18} />}
-                    onClick={
-                        uploadDisabled ||
-                        uploadLoading
-                            ? undefined
-                            : onUpload
-                    }
-                />
+                    <IconButton
+                        title={uploadLoading ? "Uploading..." : "Upload"}
+                        icon={<Upload size={15} />}
+                        onClick={
+                            uploadDisabled || uploadLoading
+                                ? undefined
+                                : onUpload
+                        }
+                    />
+                </div>
             </div>
         </div>
     );

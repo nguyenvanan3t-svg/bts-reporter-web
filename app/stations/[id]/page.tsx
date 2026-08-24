@@ -8,6 +8,8 @@ import {
     loadFtpResources,
 } from "@/features/stations/service";
 import StationFtpResources from "@/features/stations/components/StationFtpResources";
+import StationHeader
+from "@/features/stations/components/StationHeader";
 
 type Props = {
     params: Promise<{
@@ -40,86 +42,13 @@ export default async function StationDetailPage({
             }}
         >
 
-            <div
-                style={{
-                    marginBottom: 24,
-                }}
-            >
-
-                <div
-                    style={{
-                        color: "#2563eb",
-                        fontSize: 15,
-                        marginBottom: 8,
-                    }}
-                >
-                    <a
-                        href="/"
-                        style={{
-                            color: "#2563eb",
-                            textDecoration: "none",
-                        }}
-                    >
-                        Home
-                    </a>
-
-                    {" > "}
-
-                    <a
-                        href="/projects"
-                        style={{
-                            color: "#2563eb",
-                            textDecoration: "none",
-                        }}
-                    >
-                        Projects
-                    </a>
-
-                    {" > "}
-
-                    <a
-                        href={`/projects/${station.projectId}`}
-                        style={{
-                            color: "#2563eb",
-                            textDecoration: "none",
-                        }}
-                    >
-                        {station.project?.name ?? "Project"}
-                    </a>
-
-                    {" > "}
-
-                    <span
-                        style={{
-                            color: "#1e293b",
-                            fontWeight: 600,
-                        }}
-                    >
-                        {station.code}
-                    </span>
-                </div>
-
-                <h1
-                    style={{
-                        margin: 0,
-                        fontSize: 36,
-                        fontWeight: 700,
-                    }}
-                >
-                    Station Detail
-                </h1>
-
-                <div
-                    style={{
-                        marginTop: 8,
-                        color: "#64748b",
-                        fontSize: 18,
-                    }}
-                >
-                    Station ID: {station.code}
-                </div>
-
-            </div>
+            <StationHeader
+                stationCode={station.code}
+                projectId={station.projectId}
+                projectName={station.project?.name ?? "Project"}
+                province={station.province}
+                status={stationStatus}
+            />
 
             <StationLayout
 

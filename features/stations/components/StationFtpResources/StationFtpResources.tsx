@@ -510,91 +510,70 @@ export default function StationFtpResources({
             />
             <div
                 style={{
-                    marginBottom: 12,
-                    padding: "16px 20px",
-                    borderRadius: 12,
-                    background: "#1E3A8A",
-                    color: "#FFFFFF",
+                    marginBottom: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "9px 14px",
+                    background: "#FFFFFF",
+                    border: "1px solid #E2E8F0",
+                    borderLeft: "4px solid #2563EB",
+                    borderRadius: 10,
+                    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
                 }}
             >
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent:
-                            "space-between",
-                        gap: 16,
-                    }}
-                >
-                    <div>
-                        <div
-                            style={{
-                                fontSize: 22,
-                                fontWeight: 700,
-                                marginBottom: 6,
-                            }}
-                        >
-                            Resource Monitor
-                        </div>
-
-                        <div
-                            style={{
-                                color: "#DBEAFE",
-                                fontSize: 14,
-                            }}
-                        >
-                            Current survey and document
-                            resources detected on FTP
-                            server.
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={() => void scanFtp()}
-                        disabled={scanning}
-                        style={{
-                            border: 0,
-                            borderRadius: 8,
-                            padding:
-                                "9px 16px",
-                            background:
-                                "#2563eb",
-                            color: "#fff",
-                            cursor: scanning
-                                ? "default"
-                                : "pointer",
-                            opacity: scanning
-                                ? 0.6
-                                : 1,
-                            fontWeight: 600,
-                        }}
-                    >
-                        {scanning
-                            ? "Scanning..."
-                            : "Scan FTP"}
-                    </button>
-                </div>
-
-                {error && (
+                <div style={{ minWidth: 0 }}>
                     <div
                         style={{
-                            marginTop: 10,
-                            color: "#dc2626",
-                            fontSize: 14,
+                            fontSize: 15,
+                            lineHeight: 1.2,
+                            fontWeight: 700,
+                            color: "#0F172A",
                         }}
                     >
-                        {error}
+                        Resource Monitor
                     </div>
-                )}
+
+                    <div
+                        style={{
+                            marginTop: 2,
+                            color: "#64748B",
+                            fontSize: 10.5,
+                            lineHeight: 1.3,
+                        }}
+                    >
+                        Current survey and document resources detected on FTP server.
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => void scanFtp()}
+                    disabled={scanning}
+                    style={{
+                        flexShrink: 0,
+                        border: 0,
+                        borderRadius: 7,
+                        padding: "7px 12px",
+                        background: "#2563EB",
+                        color: "#FFFFFF",
+                        cursor: scanning ? "default" : "pointer",
+                        opacity: scanning ? 0.6 : 1,
+                        fontWeight: 600,
+                        fontSize: 12,
+                    }}
+                >
+                    {scanning ? "Scanning..." : "Scan FTP"}
+                </button>
             </div>
 
             <div
                 style={{
                     display: "grid",
                     gridTemplateColumns:
-                        "repeat(4, 1fr)",
-                    gap: 20,
+                        "repeat(4, minmax(0, 1fr))",
+                    gap: 14,
                 }}
             >
                 <ResourceCard
@@ -737,7 +716,7 @@ export default function StationFtpResources({
 
             <div
                 style={{
-                    height: 24,
+                    height: 16,
                 }}
             />
 

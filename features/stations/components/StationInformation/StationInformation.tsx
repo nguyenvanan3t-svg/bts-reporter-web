@@ -24,8 +24,8 @@ type InfoIconProps = {
 
 function InfoIcon({ type }: InfoIconProps) {
     const common = {
-        width: 20,
-        height: 20,
+        width: 19,
+        height: 19,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -114,6 +114,28 @@ type InfoRowProps = {
     last?: boolean;
 };
 
+function formatFileName(value?: string | null) {
+    if (!value) {
+        return "-";
+    }
+
+    return value.replace(/_/g, "_\u200B");
+}
+
+function formatDisplayDate(value?: string) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "-";
+    }
+
+    return date.toLocaleDateString("vi-VN");
+}
+
 function InfoRow({
     label,
     value,
@@ -124,10 +146,10 @@ function InfoRow({
         <div
             style={{
                 display: "grid",
-                gridTemplateColumns: "112px minmax(0, 1fr)",
-                columnGap: 12,
+                gridTemplateColumns: "108px minmax(0, 1fr)",
+                columnGap: 10,
                 alignItems: "start",
-                padding: "13px 0",
+                padding: "9px 0",
                 borderBottom: last
                     ? "none"
                     : "1px solid #E5E7EB",
@@ -137,20 +159,20 @@ function InfoRow({
                 style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 9,
+                    gap: 8,
                     minWidth: 0,
                     color: "#475569",
                     fontWeight: 600,
-                    fontSize: 13,
-                    lineHeight: 1.35,
+                    fontSize: 12,
+                    lineHeight: 1.3,
                     whiteSpace: "nowrap",
                 }}
             >
                 <span
                     style={{
                         flex: "0 0 auto",
-                        width: 22,
-                        height: 22,
+                        width: 20,
+                        height: 20,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -167,8 +189,8 @@ function InfoRow({
                 style={{
                     minWidth: 0,
                     color: "#111827",
-                    fontSize: 13,
-                    lineHeight: 1.5,
+                    fontSize: 12,
+                    lineHeight: 1.45,
                     overflowWrap: "anywhere",
                     wordBreak: "break-word",
                 }}
@@ -195,44 +217,45 @@ export default function StationInformation({
     const statusBadgeStyle = {
         display: "inline-flex",
         alignItems: "center",
-        gap: 7,
-        padding: "4px 10px",
+        gap: 6,
+        padding: "3px 9px",
         borderRadius: 999,
         background: isCompleted ? "#DCFCE7" : "#FEF3C7",
         color: isCompleted ? "#15803D" : "#92400E",
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
         lineHeight: 1.2,
+        whiteSpace: "nowrap" as const,
     };
 
     return (
         <div>
             <div
                 style={{
-                    margin: "-16px -16px 8px -16px",
-                    padding: "15px 16px",
+                    margin: "-16px -16px 7px -16px",
+                    padding: "12px 14px",
                     background: "#1E3A8A",
                     color: "#FFFFFF",
                     fontWeight: 700,
-                    fontSize: 15,
+                    fontSize: 14,
                     lineHeight: 1.2,
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
+                    gap: 8,
                 }}
             >
                 <span
                     style={{
-                        width: 24,
-                        height: 24,
+                        width: 22,
+                        height: 22,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                     }}
                 >
                     <svg
-                        width="21"
-                        height="21"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -248,7 +271,7 @@ export default function StationInformation({
                 <span>Station Information</span>
             </div>
 
-            <div style={{ paddingTop: 2 }}>
+            <div style={{ paddingTop: 1 }}>
                 <InfoRow icon="code" label="Code" value={code} />
                 <InfoRow icon="project" label="Project" value={project} />
                 <InfoRow
@@ -269,7 +292,7 @@ export default function StationInformation({
                 <InfoRow
                     icon="file"
                     label="Excel Source"
-                    value={excelSource ?? "-"}
+                    value={formatFileName(excelSource)}
                 />
                 <InfoRow
                     icon="status"
@@ -278,8 +301,8 @@ export default function StationInformation({
                         <span style={statusBadgeStyle}>
                             <span
                                 style={{
-                                    width: 7,
-                                    height: 7,
+                                    width: 6,
+                                    height: 6,
                                     borderRadius: "50%",
                                     background: isCompleted
                                         ? "#15803D"
@@ -293,12 +316,13 @@ export default function StationInformation({
                 <InfoRow
                     icon="date"
                     label="Created"
-                    value={createdAt ?? "-"}
+                    value={formatDisplayDate(createdAt)}
                 />
+
                 <InfoRow
                     icon="date"
                     label="Updated"
-                    value={updatedAt ?? "-"}
+                    value={formatDisplayDate(updatedAt)}
                     last
                 />
             </div>

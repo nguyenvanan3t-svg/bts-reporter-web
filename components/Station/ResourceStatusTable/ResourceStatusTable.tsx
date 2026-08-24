@@ -11,106 +11,89 @@ type Props = {
     items: ResourceItem[];
 };
 
+function breakableText(value: string) {
+    if (value === "-") return value;
+    return value.replace(/([_\\/.-])/g, "$1\u200B");
+}
+
 export default function ResourceStatusTable({
     items,
 }: Props) {
     return (
         <div
             style={{
-                marginTop: 24,
-                border: "1px solid #E5E7EB",
-                borderRadius: 12,
+                marginTop: 12,
+                border: "1px solid #E2E8F0",
+                borderRadius: 10,
                 background: "#FFFFFF",
                 overflow: "hidden",
+                boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
             }}
         >
+            {/* Header mới: trắng + accent xanh, thay toàn bộ thanh xanh cũ */}
             <div
                 style={{
-                    padding: "16px 24px",
-                    background: "#1E3A8A",
-                    color: "#FFFFFF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "9px 14px",
+                    background: "#FFFFFF",
+                    borderBottom: "1px solid #E2E8F0",
+                    borderLeft: "4px solid #2563EB",
                 }}
             >
-                <div
-                    style={{
-                        fontSize: 22,
-                        fontWeight: 700,
-                        color: "#FFFFFF",
-                    }}
-                >
-                    Resource Status
-                </div>
+                <div style={{ minWidth: 0 }}>
+                    <div
+                        style={{
+                            fontSize: 15,
+                            lineHeight: 1.2,
+                            fontWeight: 700,
+                            color: "#0F172A",
+                        }}
+                    >
+                        Resource Status
+                    </div>
 
-                <div
-                    style={{
-                        marginTop: 6,
-                        fontSize: 14,
-                        color: "#DBEAFE",
-                    }}
-                >
-                    Latest resource scan result from FTP server.
+                    <div
+                        style={{
+                            marginTop: 2,
+                            fontSize: 10.5,
+                            lineHeight: 1.3,
+                            color: "#64748B",
+                        }}
+                    >
+                        Latest resource scan result from FTP server.
+                    </div>
                 </div>
             </div>
 
             <table
                 style={{
                     width: "100%",
+                    maxWidth: "100%",
+                    tableLayout: "fixed",
                     borderCollapse: "collapse",
                 }}
             >
                 <thead>
-                    <tr
-                        style={{
-                            background: "#F8FAFC",
-                        }}
-                    >
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "10%",
-                            }}
-                        >
+                    <tr style={{ background: "#F8FAFC" }}>
+                        <th style={{ ...thStyle, width: "10%" }}>
                             Resource
                         </th>
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "10%",
-                            }}
-                        >
+                        <th style={{ ...thStyle, width: "10%" }}>
                             Status
                         </th>
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "30%",
-                            }}
-                        >
+                        <th style={{ ...thStyle, width: "30%" }}>
                             File name
                         </th>
-
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "30%",
-                            }}
-                        >
+                        <th style={{ ...thStyle, width: "30%" }}>
                             Path (FTP)
                         </th>
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "10%",
-                            }}
-                        >
+                        <th style={{ ...thStyle, width: "10%" }}>
                             Size
                         </th>
-                        <th
-                            style={{
-                                ...thStyle,
-                                width: "10%",
-                            }}
-                        >
+                        <th style={{ ...thStyle, width: "10%" }}>
                             Updated
                         </th>
                     </tr>
@@ -134,10 +117,11 @@ export default function ResourceStatusTable({
                             <td style={tdStyle}>
                                 <span
                                     style={{
-                                        display: "inline-block",
-                                        padding: "4px 10px",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        padding: "3px 8px",
                                         borderRadius: 999,
-                                        fontSize: 12,
+                                        fontSize: 10.5,
                                         fontWeight: 600,
                                         background:
                                             item.status === "FOUND"
@@ -166,7 +150,7 @@ export default function ResourceStatusTable({
                                             : 500,
                                 }}
                             >
-                                {item.fileName}
+                                {breakableText(item.fileName)}
                             </td>
 
                             <td
@@ -176,11 +160,11 @@ export default function ResourceStatusTable({
                                         item.path === "-"
                                             ? "#94A3B8"
                                             : "#475569",
-                                    fontSize: 13,
-                                    wordBreak: "break-all",
+                                    fontSize: 11.5,
+                                    overflowWrap: "anywhere",
                                 }}
                             >
-                                {item.path}
+                                {breakableText(item.path)}
                             </td>
 
                             <td style={tdStyle}>
@@ -200,14 +184,23 @@ export default function ResourceStatusTable({
 
 const thStyle: React.CSSProperties = {
     textAlign: "left",
-    padding: "14px 18px",
+    padding: "7px 9px",
     fontWeight: 700,
-    fontSize: 14,
-    borderBottom: "1px solid #E5E7EB",
+    fontSize: 11.5,
+    color: "#334155",
+    borderBottom: "1px solid #E2E8F0",
+    boxSizing: "border-box",
+    whiteSpace: "nowrap",
 };
 
 const tdStyle: React.CSSProperties = {
-    padding: "16px 18px",
+    padding: "7px 9px",
     borderBottom: "1px solid #F1F5F9",
-    fontSize: 14,
+    fontSize: 12,
+    color: "#0F172A",
+    boxSizing: "border-box",
+    minWidth: 0,
+    maxWidth: 0,
+    overflowWrap: "anywhere",
+    verticalAlign: "middle",
 };
