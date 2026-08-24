@@ -68,12 +68,14 @@ function StatusBadge({
         <span
             style={{
                 display: "inline-block",
-                padding: "4px 10px",
+                padding: "3px 7px",
                 borderRadius: 999,
                 background,
                 color,
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 600,
+                lineHeight: 1.2,
+                whiteSpace: "nowrap" as const,
             }}
         >
             {status}
@@ -114,12 +116,14 @@ function ResourceBadge({
         <span
             style={{
                 display: "inline-block",
-                padding: "3px 8px",
+                padding: "3px 6px",
                 borderRadius: 999,
                 background,
                 color,
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
+                lineHeight: 1.2,
+                whiteSpace: "nowrap" as const,
             }}
         >
             {text}
@@ -176,18 +180,27 @@ export default function StationList({
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 24,
-                    marginBottom: 12,
+                    alignItems: "center",
+                    gap: 16,
+                    marginBottom: 8,
                     flexWrap: "wrap",
                 }}
             >
-                <div>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        flexWrap: "wrap",
+                    }}
+                >
                     <h3
                         style={{
                             margin: 0,
-                            fontSize: 22,
+                            fontSize: 19,
                             fontWeight: 700,
+                            color: "#0F172A",
+                            lineHeight: 1.2,
                         }}
                     >
                         Stations ({filteredStations.length})
@@ -196,8 +209,7 @@ export default function StationList({
                     <div
                         style={{
                             display: "flex",
-                            gap: 10,
-                            marginTop: 8,
+                            gap: 6,
                         }}
                     >
                         <Button
@@ -224,7 +236,7 @@ export default function StationList({
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 14,
+                        gap: 10,
                     }}
                 >
                     <div
@@ -234,9 +246,9 @@ export default function StationList({
                     >
                         <div
                             style={{
-                                fontSize: 13,
+                                fontSize: 11,
                                 fontWeight: 600,
-                                color: "#374151",
+                                color: "#475569",
                             }}
                         >
                             FTP Resources
@@ -244,9 +256,10 @@ export default function StationList({
 
                         <div
                             style={{
-                                marginTop: 3,
-                                fontSize: 12,
+                                marginTop: 1,
+                                fontSize: 10,
                                 color: "#64748B",
+                                whiteSpace: "nowrap",
                             }}
                         >
                             {lastScanAt
@@ -271,7 +284,7 @@ export default function StationList({
 
             <div
                 style={{
-                    marginBottom: 12,
+                    marginBottom: 8,
                 }}
             >
                 <input
@@ -283,18 +296,23 @@ export default function StationList({
                     }
                     style={{
                         width: "100%",
-                        padding: "8px 10px",
-                        border: "1px solid #d1d5db",
-                        borderRadius: 6,
+                        height: 32,
+                        padding: "0 10px",
+                        border: "1px solid #CBD5E1",
+                        borderRadius: 7,
+                        fontSize: 13,
+                        color: "#0F172A",
+                        boxSizing: "border-box",
+                        outline: "none",
                     }}
                 />
             </div>
             <div
                 style={{
-                    maxHeight: 500,
+                    maxHeight: 460,
                     overflow: "auto",
-                    border: "1px solid #ddd",
-                    borderRadius: 6,
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 8,
                 }}
             >
                 <table
@@ -305,34 +323,80 @@ export default function StationList({
                 >
                     <thead>
                         <tr>
-                            <th style={thStyle}>#</th>
-                            <th style={thStyle}>Station</th>
-                            <th style={thStyle}>Province</th>
-                            <th style={thStyle}>Survey</th>
-                            <th style={thStyle}>Word</th>
-                            <th style={thStyle}>Visio</th>
-                            <th style={thStyle}>PDF</th>
-                            <th style={thStyle}>Status</th>
-                            <th style={thStyle}>Action</th>
+                            <th style={{ ...thStyle, ...columnStyles.index }}>
+                                #
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.station }}>
+                                Station
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.province }}>
+                                Province
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.resource }}>
+                                Survey
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.resource }}>
+                                Word
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.resource }}>
+                                Visio
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.resource }}>
+                                PDF
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.status }}>
+                                Status
+                            </th>
+
+                            <th style={{ ...thStyle, ...columnStyles.action }}>
+                                Action
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {filteredStations.map((station, index) => (
                             <tr key={station.id}>
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.index,
+                                    }}
+                                >
                                     {index + 1}
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.station,
+                                    }}
+                                >
                                     {station.code}
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.province,
+                                    }}
+                                >
                                     {station.province}
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.resource,
+                                    }}
+                                >
                                     <ResourceBadge
                                         status={
                                             ftpResults[station.code]
@@ -342,7 +406,12 @@ export default function StationList({
                                     />
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.resource,
+                                    }}
+                                >
                                     <ResourceBadge
                                         status={
                                             ftpResults[station.code]
@@ -352,7 +421,12 @@ export default function StationList({
                                     />
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.resource,
+                                    }}
+                                >
                                     <ResourceBadge
                                         status={
                                             ftpResults[station.code]
@@ -362,7 +436,12 @@ export default function StationList({
                                     />
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.resource,
+                                    }}
+                                >
                                     <ResourceBadge
                                         status={
                                             ftpResults[station.code]
@@ -372,8 +451,12 @@ export default function StationList({
                                     />
                                 </td>
 
-                                <td style={tdStyle}>
-
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.status,
+                                    }}
+                                >
                                     <StatusBadge
                                         status={
                                             ftpResults[station.code]?.pdf.status ===
@@ -382,16 +465,21 @@ export default function StationList({
                                                 : "PENDING"
                                         }
                                     />
-
                                 </td>
 
-                                <td style={tdStyle}>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        ...columnStyles.action,
+                                    }}
+                                >
 
                                     <div
                                         style={{
                                             display: "flex",
                                             gap: 4,
                                             alignItems: "center",
+                                            justifyContent: "center",
                                         }}
                                     >
 
@@ -437,16 +525,54 @@ export default function StationList({
 }
 
 const thStyle = {
-    border: "1px solid #ddd",
-    padding: 8,
-    background: "#f5f5f5",
+    border: "1px solid #e2e8f0",
+    padding: "6px 7px",
+    background: "#f8fafc",
     textAlign: "left" as const,
     position: "sticky" as const,
     top: 0,
     zIndex: 2,
+    fontSize: 12,
+    fontWeight: 600,
+    whiteSpace: "nowrap" as const,
+    color: "#0f172a",
 };
 
 const tdStyle = {
-    border: "1px solid #ddd",
-    padding: 8,
+    border: "1px solid #e2e8f0",
+    padding: "5px 7px",
+    fontSize: 12,
+    whiteSpace: "nowrap" as const,
+    verticalAlign: "middle" as const,
+    color: "#0f172a",
+};
+
+const columnStyles = {
+    index: {
+        width: 40,
+        textAlign: "center" as const,
+    },
+
+    station: {
+        width: 110,
+    },
+
+    province: {
+        width: 115,
+    },
+
+    resource: {
+        width: 82,
+        textAlign: "center" as const,
+    },
+
+    status: {
+        width: 105,
+        textAlign: "center" as const,
+    },
+
+    action: {
+        width: 70,
+        textAlign: "center" as const,
+    },
 };

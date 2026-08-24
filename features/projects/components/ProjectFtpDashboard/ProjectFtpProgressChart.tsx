@@ -19,13 +19,13 @@ type Props = {
     history: ScanHistoryItem[];
 };
 
-const CHART_WIDTH = 300;
-const CHART_HEIGHT = 170;
+const CHART_WIDTH = 280;
+const CHART_HEIGHT = 145;
 
-const PADDING_LEFT = 32;
-const PADDING_RIGHT = 8;
-const PADDING_TOP = 12;
-const PADDING_BOTTOM = 24;
+const PADDING_LEFT = 28;
+const PADDING_RIGHT = 6;
+const PADDING_TOP = 8;
+const PADDING_BOTTOM = 20;
 
 const COLORS = {
     survey: "#16a34a",

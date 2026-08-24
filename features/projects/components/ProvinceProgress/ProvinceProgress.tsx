@@ -83,10 +83,12 @@ function ProgressCells({
     value,
     total,
     color,
+    stickyBottom = false,
 }: {
     value: number;
     total: number;
     color: string;
+    stickyBottom?: boolean;
 }) {
     const percentage =
         total > 0
@@ -99,7 +101,16 @@ function ProgressCells({
         <>
             <td
                 style={{
-                    padding: "8px 10px",
+                    ...(stickyBottom
+                        ? {
+                              position: "sticky",
+                              bottom: 0,
+                              zIndex: 2,
+                              background: "#f8fafc",
+                              borderTop: "1px solid #cbd5e1",
+                          }
+                        : {}),
+                    padding: "6px 8px",
                     textAlign: "center",
                     borderRight:
                         "1px solid #e2e8f0",
@@ -112,7 +123,16 @@ function ProgressCells({
 
             <td
                 style={{
-                    padding: "8px 10px",
+                    ...(stickyBottom
+                        ? {
+                              position: "sticky",
+                              bottom: 0,
+                              zIndex: 2,
+                              background: "#f8fafc",
+                              borderTop: "1px solid #cbd5e1",
+                          }
+                        : {}),
+                    padding: "6px 8px",
                     borderRight:
                         "1px solid #e2e8f0",
                     borderBottom:
@@ -123,7 +143,7 @@ function ProgressCells({
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 10,
+                        gap: 6,
                     }}
                 >
                     <div
@@ -148,9 +168,10 @@ function ProgressCells({
 
                     <span
                         style={{
-                            width: 42,
+                            width: 36,
                             textAlign: "right",
                             whiteSpace: "nowrap",
+                            fontSize: 12,
                         }}
                     >
                         {percentage}%
@@ -276,6 +297,10 @@ export default function ProvinceProgress({
         );
     }, [provinceProgress]);
 
+    // UI only: keep the province section compact when there are many provinces.
+    // The table remains a single table so all columns stay aligned.
+    const shouldScrollProvinces = provinceProgress.length > 5;
+
     return (
         <div
             style={{
@@ -288,8 +313,7 @@ export default function ProvinceProgress({
             <div
                 style={{
                     padding: "14px 16px",
-                    borderBottom:
-                        "1px solid #e2e8f0",
+                    borderBottom: "1px solid #e2e8f0",
                 }}
             >
                 <h2
@@ -300,19 +324,24 @@ export default function ProvinceProgress({
                         color: "#0f172a",
                     }}
                 >
-                    PROVINCE PROGRESS (
-                    {provinceProgress.length})
+                    PROVINCE PROGRESS ({provinceProgress.length})
                 </h2>
             </div>
 
             <div
                 style={{
                     overflowX: "auto",
+                    overflowY: shouldScrollProvinces ? "auto" : "visible",
+                    maxHeight: shouldScrollProvinces ? 300 : undefined,
+                    scrollbarGutter: shouldScrollProvinces
+                        ? "stable"
+                        : undefined,
                 }}
             >
                 <table
                     style={{
                         width: "100%",
+                        minWidth: 760,
                         borderCollapse: "collapse",
                         tableLayout: "fixed",
                         fontSize: 13,
@@ -320,307 +349,195 @@ export default function ProvinceProgress({
                     }}
                 >
                     <colgroup>
-                        <col style={{ width: 42 }} />
-                        <col style={{ width: 125 }} />
-                        <col style={{ width: 95 }} />
-
-                        <col style={{ width: 70 }} />
-                        <col style={{ width: 135 }} />
-
-                        <col style={{ width: 70 }} />
-                        <col style={{ width: 135 }} />
-
-                        <col style={{ width: 70 }} />
-                        <col style={{ width: 135 }} />
-
-                        <col style={{ width: 70 }} />
-                        <col style={{ width: 135 }} />
+                        <col style={{ width: 36 }} />
+                        <col style={{ width: 110 }} />
+                        <col style={{ width: 78 }} />
+                        <col style={{ width: 58 }} />
+                        <col style={{ width: 105 }} />
+                        <col style={{ width: 58 }} />
+                        <col style={{ width: 105 }} />
+                        <col style={{ width: 58 }} />
+                        <col style={{ width: 105 }} />
+                        <col style={{ width: 58 }} />
+                        <col style={{ width: 105 }} />
                     </colgroup>
 
                     <thead>
-                        <tr
-                            style={{
-                                background: "#f8fafc",
-                            }}
-                        >
-                            <th
-                                rowSpan={2}
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                    fontWeight: 700,
-                                }}
-                            >
-                                #
-                            </th>
+                        <tr style={{ background: "#f8fafc" }}>
+                            <th rowSpan={2} style={{
+                                position: "sticky", top: 0, zIndex: 3,
+                                padding: "7px 8px", textAlign: "center",
+                                verticalAlign: "middle", background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderBottom: "1px solid #e2e8f0",
+                                fontWeight: 700,
+                            }}>#</th>
 
-                            <th
-                                rowSpan={2}
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "left",
-                                    verticalAlign: "middle",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                    fontWeight: 700,
-                                }}
-                            >
-                                Province
-                            </th>
+                            <th rowSpan={2} style={{
+                                position: "sticky", top: 0, zIndex: 3,
+                                padding: "7px 8px", textAlign: "left",
+                                verticalAlign: "middle", background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderBottom: "1px solid #e2e8f0",
+                                fontWeight: 700,
+                            }}>Province</th>
 
-                            <th
-                                rowSpan={2}
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "center",
-                                    verticalAlign: "middle",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                    fontWeight: 700,
-                                }}
-                            >
-                                Total
-                                <br />
-                                Stations
-                            </th>
+                            <th rowSpan={2} style={{
+                                position: "sticky", top: 0, zIndex: 3,
+                                padding: "7px 8px", textAlign: "center",
+                                verticalAlign: "middle", background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderBottom: "1px solid #e2e8f0",
+                                fontWeight: 700,
+                            }}>Total<br />Stations</th>
 
-                            {[
-                                "Survey",
-                                "Word",
-                                "Visio",
-                                "PDF",
-                            ].map((label) => (
-                                <th
-                                    key={label}
-                                    colSpan={2}
-                                    style={{
-                                        padding: "8px 10px",
-                                        textAlign: "center",
-                                        borderRight:
-                                            "1px solid #e2e8f0",
-                                        borderBottom:
-                                            "1px solid #e2e8f0",
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    {label}
-                                </th>
+                            {["Survey", "Word", "Visio", "PDF"].map((label) => (
+                                <th key={label} colSpan={2} style={{
+                                    position: "sticky", top: 0, zIndex: 3,
+                                    padding: "7px 8px", textAlign: "center",
+                                    background: "#f8fafc",
+                                    borderRight: "1px solid #e2e8f0",
+                                    borderBottom: "1px solid #e2e8f0",
+                                    fontWeight: 700,
+                                }}>{label}</th>
                             ))}
                         </tr>
 
-                        <tr
-                            style={{
-                                background: "#f8fafc",
-                            }}
-                        >
-                            {[
-                                "Survey",
-                                "Word",
-                                "Visio",
-                                "PDF",
-                            ].map((label) => (
-                                <Fragment
-                                    key={`${label}-subheader`}
-                                >
-                                    <th
-                                        style={{
-                                            padding:
-                                                "6px 8px",
-                                            textAlign:
-                                                "center",
-                                            borderRight:
-                                                "1px solid #e2e8f0",
-                                            borderBottom:
-                                                "1px solid #e2e8f0",
-                                            fontSize: 11,
-                                            fontWeight: 600,
-                                            color: "#475569",
-                                        }}
-                                    >
-                                        Done
-                                    </th>
+                        <tr style={{ background: "#f8fafc" }}>
+                            {["Survey", "Word", "Visio", "PDF"].map((label) => (
+                                <Fragment key={`${label}-subheader`}>
+                                    <th style={{
+                                        position: "sticky", top: 33, zIndex: 3,
+                                        padding: "6px 8px", textAlign: "center",
+                                        background: "#f8fafc",
+                                        borderRight: "1px solid #e2e8f0",
+                                        borderBottom: "1px solid #e2e8f0",
+                                        fontSize: 11, fontWeight: 600,
+                                        color: "#475569",
+                                    }}>Done</th>
 
-                                    <th
-                                        style={{
-                                            padding:
-                                                "6px 8px",
-                                            textAlign:
-                                                "center",
-                                            borderRight:
-                                                "1px solid #e2e8f0",
-                                            borderBottom:
-                                                "1px solid #e2e8f0",
-                                            fontSize: 11,
-                                            fontWeight: 600,
-                                            color: "#475569",
-                                        }}
-                                    >
-                                        %
-                                    </th>
+                                    <th style={{
+                                        position: "sticky", top: 33, zIndex: 3,
+                                        padding: "6px 8px", textAlign: "center",
+                                        background: "#f8fafc",
+                                        borderRight: "1px solid #e2e8f0",
+                                        borderBottom: "1px solid #e2e8f0",
+                                        fontSize: 11, fontWeight: 600,
+                                        color: "#475569",
+                                    }}>%</th>
                                 </Fragment>
                             ))}
                         </tr>
                     </thead>
 
                     <tbody>
-                        {provinceProgress.map(
-                            (item, index) => (
-                                <tr
-                                    key={item.province}
-                                    style={{
-                                        background:
-                                            index % 2 === 0
-                                                ? "#ffffff"
-                                                : "#fafafa",
-                                    }}
-                                >
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            borderRight:
-                                                "1px solid #e2e8f0",
-                                            borderBottom:
-                                                "1px solid #e2e8f0",
-                                        }}
-                                    >
-                                        {index + 1}
-                                    </td>
+                        {provinceProgress.map((item, index) => (
+                            <tr
+                                key={item.province}
+                                style={{
+                                    background:
+                                        index % 2 === 0 ? "#ffffff" : "#fafafa",
+                                }}
+                            >
+                                <td style={{
+                                    padding: "7px 8px", textAlign: "center",
+                                    borderRight: "1px solid #e2e8f0",
+                                    borderBottom: "1px solid #e2e8f0",
+                                }}>{index + 1}</td>
 
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "left",
-                                            borderRight:
-                                                "1px solid #e2e8f0",
-                                            borderBottom:
-                                                "1px solid #e2e8f0",
-                                            fontWeight: 500,
-                                        }}
-                                    >
-                                        {item.province}
-                                    </td>
+                                <td style={{
+                                    padding: "7px 8px", textAlign: "left",
+                                    borderRight: "1px solid #e2e8f0",
+                                    borderBottom: "1px solid #e2e8f0",
+                                    fontWeight: 500,
+                                }}>{item.province}</td>
 
-                                    <td
-                                        style={{
-                                            padding: "8px 10px",
-                                            textAlign: "center",
-                                            borderRight:
-                                                "1px solid #e2e8f0",
-                                            borderBottom:
-                                                "1px solid #e2e8f0",
-                                        }}
-                                    >
-                                        {item.totalStations}
-                                    </td>
+                                <td style={{
+                                    padding: "7px 8px", textAlign: "center",
+                                    borderRight: "1px solid #e2e8f0",
+                                    borderBottom: "1px solid #e2e8f0",
+                                }}>{item.totalStations}</td>
 
-                                    <ProgressCells
-                                        value={item.survey}
-                                        total={item.totalStations}
-                                        color="#16a34a"
-                                    />
+                                <ProgressCells
+                                    value={item.survey}
+                                    total={item.totalStations}
+                                    color="#16a34a"
+                                />
+                                <ProgressCells
+                                    value={item.word}
+                                    total={item.totalStations}
+                                    color="#2563eb"
+                                />
+                                <ProgressCells
+                                    value={item.visio}
+                                    total={item.totalStations}
+                                    color="#9333ea"
+                                />
+                                <ProgressCells
+                                    value={item.pdf}
+                                    total={item.totalStations}
+                                    color="#f97316"
+                                />
+                            </tr>
+                        ))}
+                    </tbody>
 
-                                    <ProgressCells
-                                        value={item.word}
-                                        total={item.totalStations}
-                                        color="#2563eb"
-                                    />
-
-                                    <ProgressCells
-                                        value={item.visio}
-                                        total={item.totalStations}
-                                        color="#9333ea"
-                                    />
-
-                                    <ProgressCells
-                                        value={item.pdf}
-                                        total={item.totalStations}
-                                        color="#f97316"
-                                    />
-                                </tr>
-                            ),
-                        )}
-                        
-                        <tr
-                            style={{
+                    <tfoot>
+                        <tr style={{
+                            background: "#f8fafc",
+                            fontWeight: 700,
+                        }}>
+                            <td style={{
+                                position: "sticky", bottom: 0, zIndex: 2,
+                                padding: "7px 8px", textAlign: "center",
                                 background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderTop: "1px solid #cbd5e1",
+                            }}>-</td>
+
+                            <td style={{
+                                position: "sticky", bottom: 0, zIndex: 2,
+                                padding: "7px 8px", textAlign: "left",
+                                background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderTop: "1px solid #cbd5e1",
                                 fontWeight: 700,
-                            }}
-                        >
-                            <td
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "center",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                }}
-                            >
-                                -
-                            </td>
+                            }}>Total</td>
 
-                            <td
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "left",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                    fontWeight: 700,
-                                }}
-                            >
-                                Total
-                            </td>
-
-                            <td
-                                style={{
-                                    padding: "8px 10px",
-                                    textAlign: "center",
-                                    borderRight:
-                                        "1px solid #e2e8f0",
-                                    borderBottom:
-                                        "1px solid #e2e8f0",
-                                }}
-                            >
-                                {totalProgress.totalStations}
-                            </td>
+                            <td style={{
+                                position: "sticky", bottom: 0, zIndex: 2,
+                                padding: "7px 8px", textAlign: "center",
+                                background: "#f8fafc",
+                                borderRight: "1px solid #e2e8f0",
+                                borderTop: "1px solid #cbd5e1",
+                            }}>{totalProgress.totalStations}</td>
 
                             <ProgressCells
                                 value={totalProgress.survey}
                                 total={totalProgress.totalStations}
                                 color="#16a34a"
+                                stickyBottom
                             />
-
                             <ProgressCells
                                 value={totalProgress.word}
                                 total={totalProgress.totalStations}
                                 color="#2563eb"
+                                stickyBottom
                             />
-
                             <ProgressCells
                                 value={totalProgress.visio}
                                 total={totalProgress.totalStations}
                                 color="#9333ea"
+                                stickyBottom
                             />
-
                             <ProgressCells
                                 value={totalProgress.pdf}
                                 total={totalProgress.totalStations}
                                 color="#f97316"
+                                stickyBottom
                             />
                         </tr>
-                    </tbody>
+                    </tfoot>
                 </table>
             </div>
         </div>

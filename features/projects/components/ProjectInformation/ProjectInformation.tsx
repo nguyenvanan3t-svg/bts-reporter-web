@@ -193,6 +193,7 @@ export function ProjectInformation({
         fontSize: 12,
         fontWeight: 600,
         lineHeight: 1.2,
+        whiteSpace: "nowrap",
     };
 
     return (

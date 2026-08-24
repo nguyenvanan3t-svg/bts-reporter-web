@@ -9,8 +9,6 @@ import {
 import ProjectStations
 from "@/features/projects/components/ProjectStations/ProjectStations";
 import Section from "@/components/ui/Section";
-import ProjectHeader
-from "@/features/projects/components/ProjectHeader";
 import {
     StationSummary,
 } from "@/features/projects/components/StationSummary";
@@ -49,21 +47,13 @@ export default async function ProjectDetailPage(
 
         <main
             style={{
-
-                padding: 40,
-
+                padding: "10px 10px 10px",
                 background: "#f5f7fb",
-
                 minHeight: "100vh",
-
             }}
         >
 
             <Section>
-
-                <ProjectHeader
-                    project={project}
-                />
 
                 <ProjectFtpDashboard
                     project={project}

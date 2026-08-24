@@ -32,6 +32,8 @@ import {
 } from "@/features/stations/service";
 
 import ImportDialog from "@/components/Station/ImportDialog/ImportDialog";
+import ProjectHeader
+    from "@/features/projects/components/ProjectHeader";
 
 import ProjectLayout from "@/features/projects/components/ProjectLayout";
 import {
@@ -474,146 +476,21 @@ export default function ProjectFtpDashboard({
                 position: "relative",
             }}
         >
-            <div
-                style={{
-                    position: "absolute",
-                    top: -145,
-                    right: 0,
-                    width: "calc(100% - 360px)",
-                    display: "grid",
-                    gridTemplateColumns:
-                        "repeat(4, 1fr)",
-                    alignItems: "center",
-                    padding: "8px 0",
-                    zIndex: 10,
-                }}
-            >
-                <div
-                    style={{
-                        padding: "0 18px",
-                        borderRight:
-                            "1px solid #e2e8f0",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 12,
-                            color: "#64748b",
-                            marginBottom: 4,
-                        }}
-                    >
-                        Survey
-                    </div>
-
-                    <div
-                        style={{
-                            fontSize: 17,
-                            fontWeight: 600,
-                            color: "#0f172a",
-                        }}
-                    >
-                        {hasScanned
-                            ? `${scanSummary.survey}/${stations.length}`
-                            : `0/${stations.length}`}
-                    </div>
-                </div>
-
-                <div
-                    style={{
-                        padding: "0 18px",
-                        borderRight:
-                            "1px solid #e2e8f0",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 12,
-                            color: "#64748b",
-                            marginBottom: 4,
-                        }}
-                    >
-                        Documents
-                    </div>
-
-                    <div
-                        style={{
-                            fontSize: 17,
-                            fontWeight: 600,
-                            color: "#0f172a",
-                        }}
-                    >
-                        {hasScanned
-                            ? `${scanSummary.pdf}/${stations.length}`
-                            : `0/${stations.length}`}
-                    </div>
-                </div>
-
-                <div
-                    style={{
-                        padding: "0 18px",
-                        borderRight:
-                            "1px solid #e2e8f0",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 12,
-                            color: "#64748b",
-                            marginBottom: 4,
-                        }}
-                    >
-                        Last scan
-                    </div>
-
-                    <div
-                        style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: "#0f172a",
-                        }}
-                    >
-                        {lastScanAt
-                            ? new Date(
-                                lastScanAt,
-                            ).toLocaleString(
-                                "vi-VN",
-                                {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                },
-                            )
-                            : "Chưa scan"}
-                    </div>
-                </div>
-
-                <div
-                    style={{
-                        padding: "0 18px",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 12,
-                            color: "#64748b",
-                            marginBottom: 4,
-                        }}
-                    >
-                        Status
-                    </div>
-
-                    <div
-                        style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: "#0f172a",
-                        }}
-                    >
-                        {project.status}
-                    </div>
-                </div>
-            </div>
+            <ProjectHeader
+                project={project}
+                survey={
+                    hasScanned
+                        ? scanSummary.survey
+                        : 0
+                }
+                documents={
+                    hasScanned
+                        ? scanSummary.pdf
+                        : 0
+                }
+                totalStations={stations.length}
+                lastScanAt={lastScanAt}
+            />
 
             <ProjectLayout
                 left={
@@ -633,14 +510,24 @@ export default function ProjectFtpDashboard({
                     </Card>
                 }
                 center={
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <ProvinceProgress
                             stations={stations}
                             ftpResults={scanResults}
                             ftpScanned={hasScanned}
                         />
 
-                        <Card>
+                        <div
+                            style={{
+                                marginTop: 12,
+                                padding: 12,
+                                background: "#FFFFFF",
+                                border: "1px solid #E2E8F0",
+                                borderRadius: 12,
+                                boxShadow:
+                                    "0 2px 8px rgba(15, 23, 42, 0.04)",
+                            }}
+                        >
                             <StationList
                                 stations={stations}
                                 ftpResults={
@@ -665,30 +552,33 @@ export default function ProjectFtpDashboard({
                                     handleExport
                                 }
                                 onImport={
-                                    handleOpenImport
+                                    () => setImportOpen(true)
                                 }
                                 onDelete={
-                                    setRemoveStationId
+                                    (stationId) =>
+                                        setRemoveStationId(
+                                            stationId,
+                                        )
                                 }
                             />
-                        </Card>
+                        </div>
                     </div>
                 }
                 right={
                     <Card>
-                        <div className="p-4">
-                            <div className="mb-3 flex items-center justify-between">
-                                <h3 className="text-base font-semibold">
-                                    PROGRESS
-                                </h3>
+                        <div className="p-3">
+                            <div className="mb-2 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold">
+                                PROGRESS
+                            </h3>
 
-                                <span className="text-xs text-muted-foreground">
-                                    Snapshot
-                                </span>
-                            </div>
+                            <span className="text-[10px] text-muted-foreground">
+                                Snapshot
+                            </span>
+                        </div>
 
                             {/* Tiến độ hiện tại */}
-                            <div className="mb-4 grid grid-cols-2 gap-x-5 gap-y-3">
+                            <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-2">
                                 {[
                                     {
                                         label: "Survey",
@@ -724,7 +614,7 @@ export default function ProjectFtpDashboard({
                                         <div
                                             key={item.label}
                                         >
-                                            <div className="mb-1 flex items-center justify-between text-xs">
+                                            <div className="mb-1 flex items-center justify-between text-[10px]">
                                                 <span className="font-medium">
                                                     {item.label}
                                                 </span>
@@ -759,12 +649,12 @@ export default function ProjectFtpDashboard({
 
                             {/* Lịch sử tiến độ */}
                             {scanHistory.length > 0 && (
-                                <div className="mt-3 border-t border-slate-200 pt-3">
-                                    <div className="mb-2 text-xs font-semibold">
+                                <div className="mt-2 border-t border-slate-200 pt-2">
+                                    <div className="mb-1.5 text-[11px] font-semibold">
                                         Progress History
                                     </div>
 
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                         <div
                                             className="grid items-center gap-x-1 text-[10px]"
                                             style={{
