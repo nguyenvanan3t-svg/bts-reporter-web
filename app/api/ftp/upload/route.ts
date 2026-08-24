@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import {
     ProjectRepository,
@@ -33,6 +34,13 @@ export const runtime = "nodejs";
 export async function POST(
     request: Request,
 ) {
+    const auth =
+        await requireAuth();
+
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+
     try {
         const formData =
             await request.formData();

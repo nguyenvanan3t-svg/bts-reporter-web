@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import { projectService } from "@/services/container";
 
 export async function GET() {
+  const auth = await requireAuth();
+
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const projects = await projectService.getAll();
 
@@ -32,6 +39,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAuth();
+
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const body = await request.json();
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import { projectService } from "@/services/container";
 
@@ -10,6 +11,12 @@ export async function PUT(
     }>;
   }
 ) {
+  const auth = await requireAuth();
+
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { id } = await context.params;
 
@@ -46,6 +53,12 @@ export async function DELETE(
         }>;
     }
 ) {
+    const auth = await requireAuth();
+
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+
     try {
         const { id } = await context.params;
 

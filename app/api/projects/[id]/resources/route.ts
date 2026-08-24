@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import {
     loadProjectFtpResources,
@@ -14,6 +15,12 @@ export async function GET(
         }>;
     },
 ) {
+    const auth = await requireAuth();
+
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+
     try {
         const { id } =
             await context.params;

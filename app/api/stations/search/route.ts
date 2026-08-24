@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import {
     searchByCode,
@@ -7,6 +8,12 @@ import {
 export async function GET(
     request: NextRequest,
 ) {
+    const auth =
+        await requireAuth();
+
+    if (!auth.authenticated) {
+        return auth.response;
+    }
 
     const code =
         request.nextUrl.searchParams.get("code");
