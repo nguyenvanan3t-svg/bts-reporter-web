@@ -209,26 +209,50 @@ export default function StationList({
                     <div
                         style={{
                             display: "flex",
-                            gap: 6,
+                            gap: 4,
+                            alignItems: "center",
                         }}
                     >
-                        <Button
-                            onClick={onImport}
+                        <div
+                            style={{
+                                transform: "scale(0.9)",
+                                transformOrigin: "left center",
+                                marginRight: -8,
+                            }}
                         >
-                            Import
-                        </Button>
+                            <Button
+                                onClick={onImport}
+                            >
+                                Import
+                            </Button>
+                        </div>
 
-                        <Button
-                            onClick={onExport}
+                        <div
+                            style={{
+                                transform: "scale(0.9)",
+                                transformOrigin: "left center",
+                                marginRight: -8,
+                            }}
                         >
-                            Export
-                        </Button>
+                            <Button
+                                onClick={onExport}
+                            >
+                                Export
+                            </Button>
+                        </div>
 
-                        <Button
-                            onClick={onRefresh}
+                        <div
+                            style={{
+                                transform: "scale(0.9)",
+                                transformOrigin: "left center",
+                            }}
                         >
-                            Refresh
-                        </Button>
+                            <Button
+                                onClick={onRefresh}
+                            >
+                                Refresh
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -270,15 +294,23 @@ export default function StationList({
                         </div>
                     </div>
 
-                    <Button
-                        variant="primary"
-                        loading={ftpScanning}
-                        onClick={onScanFtp}
+                    <div
+                        style={{
+                            transform: "scale(0.9)",
+                            transformOrigin: "right center",
+                            marginLeft: -8,
+                        }}
                     >
-                        {ftpScanning
-                            ? "Scanning..."
-                            : "Scan FTP"}
-                    </Button>
+                        <Button
+                            variant="primary"
+                            loading={ftpScanning}
+                            onClick={onScanFtp}
+                        >
+                            {ftpScanning
+                                ? "Scanning..."
+                                : "Scan FTP"}
+                        </Button>
+                    </div>
                 </div>
             </div>
 

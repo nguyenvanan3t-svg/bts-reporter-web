@@ -201,7 +201,7 @@ export function ProjectInformation({
             <div
                 style={{
                     margin: "-16px -16px 8px -16px",
-                    padding: "15px 16px",
+                    padding: "17px 16px 9px",
                     background: "#1E3A8A",
                     color: "#FFFFFF",
                     fontWeight: 700,

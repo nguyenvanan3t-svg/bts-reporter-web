@@ -312,7 +312,7 @@ export default function ProvinceProgress({
         >
             <div
                 style={{
-                    padding: "14px 16px",
+                    padding: "16px 16px 10px",
                     borderBottom: "1px solid #e2e8f0",
                 }}
             >
