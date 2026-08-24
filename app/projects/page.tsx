@@ -4,6 +4,7 @@ import ProjectDashboardHeader from "@/features/projects/components/ProjectDashbo
 import ProjectHome from "@/features/projects/components/ProjectHome";
 import {
     loadProjectsPdfProgress,
+    loadLatestFtpScan,
 } from "@/features/stations/service";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,9 @@ export const dynamic = "force-dynamic";
 export default async function ProjectsPage() {
     const projects =
         await projectService.getAll();
+
+    const lastScan =
+        await loadLatestFtpScan();
 
     const progressByProject =
         await loadProjectsPdfProgress(
@@ -38,6 +42,10 @@ export default async function ProjectsPage() {
             >
                 <ProjectDashboardHeader
                     totalProjects={projects.length}
+                    lastScan={
+                        lastScan?.completedAt ??
+                        null
+                    }
                 />
 
                 <ProjectSearch />

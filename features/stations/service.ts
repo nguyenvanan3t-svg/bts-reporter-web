@@ -19,6 +19,7 @@ import {
     getStationByProjectAndCode,
     getProjectFtpResources,
     getLatestProjectFtpScan,
+    getLatestFtpScan,
     getProjectFtpScanHistory,
     getProjectsPdfProgress,
 } from "./repository";
@@ -111,6 +112,10 @@ export async function loadLatestProjectFtpScan(
     return getLatestProjectFtpScan(
         projectId,
     );
+}
+
+export async function loadLatestFtpScan() {
+    return getLatestFtpScan();
 }
 
 export async function loadProjectFtpScanHistory(

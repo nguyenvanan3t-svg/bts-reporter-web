@@ -6,10 +6,33 @@ import { createClient } from "@/lib/supabase/client";
 
 type Props = {
     totalProjects: number;
+    lastScan: string | null;
 };
+
+function formatLastScan(value: string | null) {
+    if (!value) {
+        return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "—";
+    }
+
+    return new Intl.DateTimeFormat("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).format(date);
+}
 
 export default function ProjectDashboardHeader({
     totalProjects,
+    lastScan,
 }: Props) {
     const router = useRouter();
 
@@ -189,7 +212,7 @@ export default function ProjectDashboardHeader({
                         <SummaryCard
                             icon="clock"
                             title="Last scan"
-                            value="—"
+                            value={formatLastScan(lastScan)}
                             caption="Latest scan time"
                         />
                     </div>
@@ -288,10 +311,11 @@ function SummaryCard({
 
                 <div
                     style={{
-                        fontSize: 19,
+                        fontSize: icon === "clock" ? 16 : 19,
                         fontWeight: 750,
                         lineHeight: 1.1,
                         color: "#102A56",
+                        whiteSpace: "nowrap",
                     }}
                 >
                     {value}

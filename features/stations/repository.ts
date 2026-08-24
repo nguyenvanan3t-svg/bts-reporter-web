@@ -1211,6 +1211,44 @@ export async function getLatestProjectFtpScan(
     };
 }
 
+export async function getLatestFtpScan(): Promise<{
+    id: string;
+    projectId: string;
+    startedAt: string;
+    completedAt: string | null;
+    status: "COMPLETED";
+} | null> {
+
+    const { data, error } = await supabase
+        .from("ftp_scan_runs")
+        .select(
+            "id, project_id, started_at, completed_at, status",
+        )
+        .eq("status", "COMPLETED")
+        .order("completed_at", {
+            ascending: false,
+        })
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    if (!data) {
+        return null;
+    }
+
+    return {
+        id: data.id,
+        projectId: data.project_id,
+        startedAt: data.started_at,
+        completedAt:
+            data.completed_at,
+        status: data.status,
+    };
+}
+
 export async function getProjectFtpScanHistory(
     projectId: string,
 ): Promise<
