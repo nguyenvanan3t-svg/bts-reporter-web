@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
 
 import { ProjectRepository } from "@/features/projects/repository";
 import {
@@ -16,7 +17,15 @@ const projectRepository =
 export async function POST(
     request: Request,
 ) {
+    const auth =
+        await requireAuth();
+
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+
     let scanRunId: string | null = null;
+
     try {
         const body =
             await request.json();
