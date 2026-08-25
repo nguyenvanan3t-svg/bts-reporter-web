@@ -68,116 +68,124 @@ export default function ResourceStatusTable({
                 </div>
             </div>
 
-            <table
+            <div
                 style={{
                     width: "100%",
-                    maxWidth: "100%",
-                    tableLayout: "fixed",
-                    borderCollapse: "collapse",
+                    overflowX: "auto",
+                    WebkitOverflowScrolling: "touch",
                 }}
             >
-                <thead>
-                    <tr style={{ background: "#F8FAFC" }}>
-                        <th style={{ ...thStyle, width: "10%" }}>
-                            Resource
-                        </th>
-                        <th style={{ ...thStyle, width: "10%" }}>
-                            Status
-                        </th>
-                        <th style={{ ...thStyle, width: "30%" }}>
-                            File name
-                        </th>
-                        <th style={{ ...thStyle, width: "30%" }}>
-                            Path (FTP)
-                        </th>
-                        <th style={{ ...thStyle, width: "10%" }}>
-                            Size
-                        </th>
-                        <th style={{ ...thStyle, width: "10%" }}>
-                            Updated
-                        </th>
-                    </tr>
-                </thead>
+                <table
+                    style={{
+                        width: "100%",
+                        minWidth: 680,
+                        tableLayout: "fixed",
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr style={{ background: "#F8FAFC" }}>
+                            <th style={{ ...thStyle, width: "10%" }}>
+                                Resource
+                            </th>
+                            <th style={{ ...thStyle, width: "10%" }}>
+                                Status
+                            </th>
+                            <th style={{ ...thStyle, width: "30%" }}>
+                                File name
+                            </th>
+                            <th style={{ ...thStyle, width: "30%" }}>
+                                Path (FTP)
+                            </th>
+                            <th style={{ ...thStyle, width: "10%" }}>
+                                Size
+                            </th>
+                            <th style={{ ...thStyle, width: "10%" }}>
+                                Updated
+                            </th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    {items.map((item, index) => (
-                        <tr
-                            key={item.resource}
-                            style={{
-                                background:
-                                    index % 2 === 0
-                                        ? "#FFFFFF"
-                                        : "#FAFAFA",
-                            }}
-                        >
-                            <td style={tdStyle}>
-                                {item.resource}
-                            </td>
+                    <tbody>
+                        {items.map((item, index) => (
+                            <tr
+                                key={item.resource}
+                                style={{
+                                    background:
+                                        index % 2 === 0
+                                            ? "#FFFFFF"
+                                            : "#FAFAFA",
+                                }}
+                            >
+                                <td style={tdStyle}>
+                                    {item.resource}
+                                </td>
 
-                            <td style={tdStyle}>
-                                <span
+                                <td style={tdStyle}>
+                                    <span
+                                        style={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            padding: "3px 8px",
+                                            borderRadius: 999,
+                                            fontSize: 10.5,
+                                            fontWeight: 600,
+                                            background:
+                                                item.status === "FOUND"
+                                                    ? "#DCFCE7"
+                                                    : "#FEE2E2",
+                                            color:
+                                                item.status === "FOUND"
+                                                    ? "#15803D"
+                                                    : "#B91C1C",
+                                        }}
+                                    >
+                                        {item.status}
+                                    </span>
+                                </td>
+
+                                <td
                                     style={{
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        padding: "3px 8px",
-                                        borderRadius: 999,
-                                        fontSize: 10.5,
-                                        fontWeight: 600,
-                                        background:
-                                            item.status === "FOUND"
-                                                ? "#DCFCE7"
-                                                : "#FEE2E2",
+                                        ...tdStyle,
                                         color:
-                                            item.status === "FOUND"
-                                                ? "#15803D"
-                                                : "#B91C1C",
+                                            item.fileName === "-"
+                                                ? "#94A3B8"
+                                                : "#2563EB",
+                                        fontWeight:
+                                            item.fileName === "-"
+                                                ? 400
+                                                : 500,
                                     }}
                                 >
-                                    {item.status}
-                                </span>
-                            </td>
+                                    {breakableText(item.fileName)}
+                                </td>
 
-                            <td
-                                style={{
-                                    ...tdStyle,
-                                    color:
-                                        item.fileName === "-"
-                                            ? "#94A3B8"
-                                            : "#2563EB",
-                                    fontWeight:
-                                        item.fileName === "-"
-                                            ? 400
-                                            : 500,
-                                }}
-                            >
-                                {breakableText(item.fileName)}
-                            </td>
+                                <td
+                                    style={{
+                                        ...tdStyle,
+                                        color:
+                                            item.path === "-"
+                                                ? "#94A3B8"
+                                                : "#475569",
+                                        fontSize: 11.5,
+                                        overflowWrap: "anywhere",
+                                    }}
+                                >
+                                    {breakableText(item.path)}
+                                </td>
 
-                            <td
-                                style={{
-                                    ...tdStyle,
-                                    color:
-                                        item.path === "-"
-                                            ? "#94A3B8"
-                                            : "#475569",
-                                    fontSize: 11.5,
-                                    overflowWrap: "anywhere",
-                                }}
-                            >
-                                {breakableText(item.path)}
-                            </td>
+                                <td style={tdStyle}>
+                                    {item.size}
+                                </td>
 
-                            <td style={tdStyle}>
-                                {item.size}
-                            </td>
-
-                            <td style={tdStyle}>
-                                {item.updated}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                <td style={tdStyle}>
+                                    {item.updated}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

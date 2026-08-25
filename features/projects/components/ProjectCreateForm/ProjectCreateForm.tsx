@@ -175,11 +175,7 @@ export default function ProjectCreateForm() {
                 />
 
                 <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "0.8fr 1.2fr",
-                        gap: 10,
-                    }}
+                    className="project-create-year-description"
                 >
                     <Field
                         label="Year"
@@ -229,11 +225,8 @@ export default function ProjectCreateForm() {
                 />
 
                 <div
+                    className="project-create-actions"
                     style={{
-                        display: "flex",
-                        justifyContent:
-                            "flex-end",
-                        gap: 8,
                         marginTop: 0,
                     }}
                 >

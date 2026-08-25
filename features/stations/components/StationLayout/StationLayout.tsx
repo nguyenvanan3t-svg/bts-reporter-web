@@ -19,12 +19,14 @@ export default function StationLayout({
     return (
 
         <div
-            style={{
-                display: "grid",
-                gridTemplateColumns: "360px 1fr",
-                gap: 24,
-                alignItems: "start",
-            }}
+            className="
+                grid
+                grid-cols-1
+                gap-4
+                items-start
+                lg:grid-cols-[360px_minmax(0,1fr)]
+                lg:gap-6
+            "
         >
 
             <div>

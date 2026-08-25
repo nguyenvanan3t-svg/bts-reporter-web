@@ -24,3 +24,209 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* =========================================================
+   Responsive layout
+   Desktop layout remains unchanged.
+   ========================================================= */
+
+.project-dashboard-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.9fr)
+    minmax(360px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.project-dashboard-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.project-dashboard-header-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-dashboard-header-summary {
+  display: flex;
+  gap: 18px;
+}
+
+.project-dashboard-summary-card {
+  width: 190px;
+}
+
+.project-list-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.project-create-year-description {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 10px;
+}
+
+.project-create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+
+  .project-dashboard-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+}
+
+/* Phone */
+@media (max-width: 600px) {
+
+  .project-dashboard-summary-value {
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+  }
+
+  .project-dashboard-header-main {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .project-dashboard-header-account {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .project-dashboard-header-summary {
+    width: 100%;
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .project-dashboard-summary-card {
+    width: auto;
+    min-width: 0;
+  }
+
+  .project-list-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .project-create-year-description {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .project-create-actions {
+    justify-content: stretch;
+  }
+
+  .project-create-actions > * {
+    flex: 1;
+  }
+
+}
+
+/* =========================================================
+   Project Header - Responsive
+   Desktop giữ nguyên layout hiện tại.
+   Mobile chuyển Header thành layout dọc.
+   ========================================================= */
+
+@media (max-width: 767px) {
+  .project-header-grid {
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .project-header-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .project-header-last-scan {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .project-header-back {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Project Header - Tablet
+   iPad portrait và các màn hình trung bình.
+   Không ảnh hưởng desktop.
+   ========================================================= */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .project-header-grid {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: start !important;
+    }
+
+    .project-header-metrics {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(4, minmax(105px, 1fr)) !important;
+    }
+
+    .project-header-back {
+        align-self: start;
+    }
+}
+
+.station-ftp-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 480px) {
+  .station-ftp-resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .station-ftp-resource-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    gap: 4px 8px !important;
+  }
+
+  .station-ftp-resource-header > div:first-child {
+    min-width: 0;
+  }
+
+  .station-ftp-resource-header button {
+    align-self: start;
+    flex-shrink: 0;
+    padding: 7px 12px !important;
+    font-size: 11px !important;
+  }
+
+  .station-header-main {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .station-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

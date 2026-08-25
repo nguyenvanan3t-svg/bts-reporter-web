@@ -51,12 +51,7 @@ export default function ProjectLeftPanel({
             </div>
 
             <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                        "repeat(2, minmax(0, 1fr))",
-                    gap: 18,
-                }}
+                className="project-list-grid"
             >
                 {projects.map((project) => (
                     <ProjectCard

@@ -11,11 +11,13 @@ export default function ProjectLayout({
 }: Props) {
     return (
         <div
-            className="grid items-start gap-3"
-            style={{
-                gridTemplateColumns:
-                    "250px minmax(0, 1fr) 300px",
-            }}
+            className="
+                grid
+                grid-cols-1
+                items-start
+                gap-3
+                lg:grid-cols-[250px_minmax(0,1fr)_300px]
+            "
         >
             <div className="min-w-0">{left}</div>
 

@@ -103,13 +103,10 @@ export default function ProjectDashboardHeader({
             />
 
             <div
+                className="project-dashboard-header-main"
                 style={{
                     position: "relative",
                     zIndex: 1,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 20,
                 }}
             >
                 <div
@@ -156,11 +153,7 @@ export default function ProjectDashboardHeader({
                     }}
                 >
                     <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 12,
-                        }}
+                        className="project-dashboard-header-account"
                     >
                         <div
                             style={{
@@ -197,10 +190,7 @@ export default function ProjectDashboardHeader({
                     </div>
 
                     <div
-                        style={{
-                            display: "flex",
-                            gap: 18,
-                        }}
+                        className="project-dashboard-header-summary"
                     >
                         <SummaryCard
                             icon="folder"
@@ -235,8 +225,8 @@ function SummaryCard({
 }) {
     return (
         <div
+            className="project-dashboard-summary-card"
             style={{
-                width: 190,
                 minHeight: 78,
                 boxSizing: "border-box",
                 padding: "10px 12px",
@@ -310,12 +300,18 @@ function SummaryCard({
                 </div>
 
                 <div
+                    className="project-dashboard-summary-value"
                     style={{
                         fontSize: icon === "clock" ? 16 : 19,
                         fontWeight: 750,
                         lineHeight: 1.1,
                         color: "#102A56",
-                        whiteSpace: "nowrap",
+                        whiteSpace:
+                            icon === "clock"
+                                ? "normal"
+                                : "nowrap",
+                        overflowWrap: "anywhere",
+                        minWidth: 0,
                     }}
                 >
                     {value}

@@ -230,6 +230,7 @@ export default function ProjectHeader({
             />
 
             <div
+                className="project-header-grid"
                 style={{
                     position: "relative",
                     display: "grid",
@@ -370,6 +371,7 @@ export default function ProjectHeader({
 
                 {/* Metrics */}
                 <div
+                    className="project-header-metrics"
                     style={{
                         display: "grid",
                         gridTemplateColumns:
@@ -417,6 +419,7 @@ export default function ProjectHeader({
                         </span>
 
                         <strong
+                            className="project-header-last-scan"
                             style={{
                                 fontSize: 12,
                                 color: "#0f172a",
@@ -435,6 +438,7 @@ export default function ProjectHeader({
                 {/* Back button */}
                 <Link
                     href="/projects"
+                    className="project-header-back"
                     style={{
                         display: "inline-flex",
                         alignItems: "center",

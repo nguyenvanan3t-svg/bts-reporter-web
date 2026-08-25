@@ -509,6 +509,7 @@ export default function StationFtpResources({
                 onChange={handleFileSelected}
             />
             <div
+                className="station-ftp-resource-header"
                 style={{
                     marginBottom: 10,
                     display: "flex",
@@ -569,12 +570,7 @@ export default function StationFtpResources({
             </div>
 
             <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                        "repeat(4, minmax(0, 1fr))",
-                    gap: 14,
-                }}
+                className="station-ftp-resource-grid"
             >
                 <ResourceCard
                     title="Survey"

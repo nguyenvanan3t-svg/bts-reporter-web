@@ -201,6 +201,7 @@ export default function StationHeader({
             </div>
 
             <div
+                className="station-header-main"
                 style={{
                     display: "flex",
                     alignItems: "center",
@@ -296,6 +297,7 @@ export default function StationHeader({
                 </div>
 
                 <div
+                    className="station-header-actions"
                     style={{
                         display: "flex",
                         alignItems: "center",

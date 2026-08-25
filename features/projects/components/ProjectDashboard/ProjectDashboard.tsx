@@ -9,13 +9,7 @@ export default function ProjectDashboard({
 }: Props) {
     return (
         <div
-            style={{
-                display: "grid",
-                gridTemplateColumns:
-                    "minmax(0, 1.9fr) minmax(360px, 0.9fr)",
-                gap: 20,
-                alignItems: "start",
-            }}
+            className="project-dashboard-layout"
         >
             <div
                 style={{
