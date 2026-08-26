@@ -13,6 +13,7 @@ import type {
     FtpResource,
     ProjectFtpScanResult,
     StationFtpScanResult,
+    StationStatus,
 } from "@/lib/ftp/types";
 import {
     parseExcelStationFile,
@@ -121,6 +122,7 @@ function createInitialStationResult(
 ): StationFtpScanResult {
     return {
         stationCode,
+        status: "PENDING",
         survey: createMissingResource(),
         word: createMissingResource(),
         visio: createMissingResource(),
@@ -436,6 +438,25 @@ async function scanDocuments(
                     item,
                     itemPath,
                 );
+
+            const normalizedPath =
+                itemPath.toLowerCase();
+
+            const violationPathMarker =
+                "/ho so/vi pham/";
+
+            if (
+                (
+                    resourceInfo.resourceType === "word" ||
+                    resourceInfo.resourceType === "visio" ||
+                    resourceInfo.resourceType === "pdf"
+                ) &&
+                normalizedPath.includes(
+                    violationPathMarker,
+                )
+            ) {
+                result.status = "Vi phạm";
+            }
         }
     }
 

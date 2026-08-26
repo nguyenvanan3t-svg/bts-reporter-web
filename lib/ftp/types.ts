@@ -1,5 +1,10 @@
 export type FtpResourceStatus = "FOUND" | "MISSING";
 
+export type StationStatus =
+    | "PENDING"
+    | "COMPLETED"
+    | "Vi phạm";
+
 export type FtpResourceType = "file" | "folder";
 
 export type FtpResource = {
@@ -13,6 +18,8 @@ export type FtpResource = {
 
 export type StationFtpScanResult = {
     stationCode: string;
+
+    status: StationStatus;
 
     survey: FtpResource;
     word: FtpResource;

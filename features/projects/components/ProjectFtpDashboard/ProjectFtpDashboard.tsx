@@ -53,6 +53,25 @@ type Props = {
     stations: Station[];
 };
 
+function isViolationResource(
+    resource: {
+        path?: string;
+    } | undefined,
+): boolean {
+    const path =
+        resource?.path
+            ?.replace(/\\/g, "/")
+            .toLowerCase();
+
+    if (!path) {
+        return false;
+    }
+
+    return path.includes(
+        "/ho so/vi pham/",
+    );
+}
+
 type ProjectFtpScanHistoryItem = {
     id: string;
     startedAt: string;
@@ -163,12 +182,32 @@ export default function ProjectFtpDashboard({
                         continue;
                     }
 
+                    const violation =
+                        isViolationResource(
+                            resourcesForStation.word,
+                        ) ||
+                        isViolationResource(
+                            resourcesForStation.visio,
+                        ) ||
+                        isViolationResource(
+                            resourcesForStation.pdf,
+                        );
+
                     resultsByStation[
                         station.code
                     ] = {
                         stationCode:
                             station.code,
                         ...resourcesForStation,
+                        status:
+                            violation
+                                ? "Vi phạm"
+                                : (
+                                    resourcesForStation.pdf?.status ===
+                                    "FOUND"
+                                        ? "COMPLETED"
+                                        : "PENDING"
+                                ),
                     };
                 }
 

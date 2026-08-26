@@ -56,6 +56,13 @@ function StatusBadge({
 
     }
 
+    if (status === "Vi phạm") {
+
+        background = "#fee2e2";
+        color = "#b91c1c";
+
+    }
+
     if (status === "IN_PROGRESS") {
 
         background = "#dbeafe";
@@ -178,7 +185,12 @@ export default function StationList({
 }: Props) {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] =
-        useState<"ALL" | "PENDING" | "COMPLETED">("ALL");
+        useState<
+            "ALL" |
+            "PENDING" |
+            "COMPLETED" |
+            "Vi phạm"
+        >("ALL");
     const [statusFilterOpen, setStatusFilterOpen] =
         useState(false);
     const filteredStations = useMemo(() => {
@@ -201,9 +213,12 @@ export default function StationList({
                     .includes(keyword);
 
             const stationStatus =
-                ftpResults[station.code]?.pdf.status === "FOUND"
-                    ? "COMPLETED"
-                    : "PENDING";
+                ftpResults[station.code]?.status ??
+                (
+                    ftpResults[station.code]?.pdf.status === "FOUND"
+                        ? "COMPLETED"
+                        : "PENDING"
+                );
 
             const matchesStatus =
                 statusFilter === "ALL" ||
@@ -398,7 +413,8 @@ export default function StationList({
                                 event.target.value as
                                     | "ALL"
                                     | "PENDING"
-                                    | "COMPLETED",
+                                    | "COMPLETED"
+                                    | "Vi phạm",
                             )
                         }
                         style={{
@@ -417,6 +433,7 @@ export default function StationList({
                         <option value="ALL">All Status</option>
                         <option value="PENDING">Pending</option>
                         <option value="COMPLETED">Complete</option>
+                        <option value="Vi phạm">Vi phạm</option>
                     </select>
 
                     {/* iPhone */}
@@ -449,7 +466,9 @@ export default function StationList({
                                     ? "All Status"
                                     : statusFilter === "PENDING"
                                     ? "Pending"
-                                    : "Complete"}
+                                    : statusFilter === "COMPLETED"
+                                    ? "Complete"
+                                    : "Vi phạm"}
                             </span>
 
                             <span
@@ -484,6 +503,7 @@ export default function StationList({
                                     ["ALL", "All Status"],
                                     ["PENDING", "Pending"],
                                     ["COMPLETED", "Complete"],
+                                    ["Vi phạm", "Vi phạm"],
                                 ].map(([value, label]) => (
                                     <button
                                         key={value}
@@ -493,7 +513,8 @@ export default function StationList({
                                                 value as
                                                     | "ALL"
                                                     | "PENDING"
-                                                    | "COMPLETED",
+                                                    | "COMPLETED"
+                                                    | "Vi phạm",
                                             );
 
                                             setStatusFilterOpen(false);
@@ -698,10 +719,13 @@ export default function StationList({
                                 >
                                     <StatusBadge
                                         status={
-                                            ftpResults[station.code]?.pdf.status ===
-                                            "FOUND"
-                                                ? "COMPLETED"
-                                                : "PENDING"
+                                            ftpResults[station.code]?.status ??
+                                            (
+                                                ftpResults[station.code]?.pdf.status ===
+                                                "FOUND"
+                                                    ? "COMPLETED"
+                                                    : "PENDING"
+                                            )
                                         }
                                     />
                                 </td>
