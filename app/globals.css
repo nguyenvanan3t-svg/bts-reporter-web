@@ -230,3 +230,76 @@ body {
     justify-content: flex-start;
   }
 }
+
+/* =========================================================
+   Station List - iPhone
+   Chỉ thay đổi layout trên màn hình <= 480px.
+   ========================================================= */
+
+.station-status-filter-native {
+  display: block !important;
+}
+
+.station-status-filter-mobile {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+
+  .station-list-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .station-list-header > div:first-child {
+    width: 100%;
+  }
+
+  .station-list-actions {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px !important;
+  }
+
+  .station-list-actions > div {
+    width: 100%;
+    margin-right: 0 !important;
+    transform: none !important;
+  }
+
+  .station-list-actions > div > button {
+    width: 100%;
+  }
+
+  .station-list-ftp {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .station-list-filter-bar {
+    flex-direction: column;
+  }
+
+  .station-list-search {
+    width: 100%;
+  }
+
+  .station-status-filter {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .station-status-filter-native {
+    display: none !important;
+  }
+
+  .station-status-filter-mobile {
+    display: block !important;
+    position: relative;
+    width: 100%;
+  }
+
+}
+

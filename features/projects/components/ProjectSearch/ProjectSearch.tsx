@@ -124,7 +124,7 @@ export default function ProjectSearch() {
                         position: "absolute",
                         top: 60,
                         left: 0,
-                        width: 680,
+                        width: "min(680px, 100%)",
 
                         background: "#FFFFFF",
                         border: "1px solid #E2E8F0",

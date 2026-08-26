@@ -123,24 +123,28 @@ export default function ResourceStatusTable({
 
                                 <td style={tdStyle}>
                                     <span
+                                        title={item.status}
                                         style={{
                                             display: "inline-flex",
                                             alignItems: "center",
-                                            padding: "3px 8px",
-                                            borderRadius: 999,
-                                            fontSize: 10.5,
-                                            fontWeight: 600,
+                                            justifyContent: "center",
+                                            width: 22,
+                                            height: 22,
+                                            borderRadius: "50%",
+                                            fontSize: 14,
+                                            fontWeight: 700,
+                                            lineHeight: 1,
                                             background:
                                                 item.status === "FOUND"
                                                     ? "#DCFCE7"
-                                                    : "#FEE2E2",
+                                                    : "#F1F5F9",
                                             color:
                                                 item.status === "FOUND"
-                                                    ? "#15803D"
-                                                    : "#B91C1C",
+                                                    ? "#16A34A"
+                                                    : "#94A3B8",
                                         }}
                                     >
-                                        {item.status}
+                                        {item.status === "FOUND" ? "✓" : "−"}
                                     </span>
                                 </td>
 

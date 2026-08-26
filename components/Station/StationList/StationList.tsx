@@ -91,44 +91,75 @@ function ResourceBadge({
     status: "FOUND" | "MISSING" | "UNKNOWN";
 }) {
 
-    let background = "#E5E7EB";
-    let color = "#6B7280";
-    let text = "Unknown";
-
     if (status === "FOUND") {
 
-        background = "#DCFCE7";
-        color = "#166534";
-        text = "Found";
+        return (
+            <span
+                title="Found"
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 22,
+                    height: 22,
+                    borderRadius: 999,
+                    background: "#DCFCE7",
+                    color: "#15803D",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                }}
+            >
+                ✓
+            </span>
+        );
 
     }
 
     if (status === "MISSING") {
 
-        background = "#FEE2E2";
-        color = "#991B1B";
-        text = "Missing";
+        return (
+            <span
+                title="Missing"
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 22,
+                    height: 22,
+                    borderRadius: 999,
+                    background: "#F1F5F9",
+                    color: "#94A3B8",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: 1,
+                }}
+            >
+                -
+            </span>
+        );
 
     }
 
     return (
-
         <span
+            title="Not scanned"
             style={{
-                display: "inline-block",
-                padding: "3px 6px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 22,
+                height: 22,
                 borderRadius: 999,
-                background,
-                color,
-                fontSize: 10,
+                background: "#F1F5F9",
+                color: "#94A3B8",
+                fontSize: 13,
                 fontWeight: 600,
-                lineHeight: 1.2,
-                whiteSpace: "nowrap" as const,
+                lineHeight: 1,
             }}
         >
-            {text}
+            ?
         </span>
-
     );
 
 }
@@ -146,37 +177,47 @@ export default function StationList({
     onImport,
 }: Props) {
     const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] =
+        useState<"ALL" | "PENDING" | "COMPLETED">("ALL");
+    const [statusFilterOpen, setStatusFilterOpen] =
+        useState(false);
     const filteredStations = useMemo(() => {
 
         const keyword =
             search.trim().toLowerCase();
 
-        if (!keyword) {
-            return stations;
-        }
-
         return stations.filter((station) => {
 
-            return (
+            const matchesSearch =
+                !keyword ||
                 station.code
                     .toLowerCase()
                     .includes(keyword) ||
-
                 station.province
                     .toLowerCase()
                     .includes(keyword) ||
-
                 station.address
                     .toLowerCase()
-                    .includes(keyword)
-            );
+                    .includes(keyword);
+
+            const stationStatus =
+                ftpResults[station.code]?.pdf.status === "FOUND"
+                    ? "COMPLETED"
+                    : "PENDING";
+
+            const matchesStatus =
+                statusFilter === "ALL" ||
+                stationStatus === statusFilter;
+
+            return matchesSearch && matchesStatus;
 
         });
 
-    }, [stations, search]);
+    }, [stations, search, statusFilter, ftpResults]);
     return (
         <div>
             <div
+                className="station-list-header"
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -207,6 +248,7 @@ export default function StationList({
                     </h3>
 
                     <div
+                        className="station-list-actions"
                         style={{
                             display: "flex",
                             gap: 4,
@@ -257,6 +299,7 @@ export default function StationList({
                 </div>
 
                 <div
+                    className="station-list-ftp"
                     style={{
                         display: "flex",
                         alignItems: "center",
@@ -315,11 +358,15 @@ export default function StationList({
             </div>
 
             <div
+                className="station-list-filter-bar"
                 style={{
+                    display: "flex",
+                    gap: 8,
                     marginBottom: 8,
                 }}
             >
                 <input
+                    className="station-list-search"
                     type="text"
                     placeholder="Search station code or province..."
                     value={search}
@@ -327,7 +374,8 @@ export default function StationList({
                         setSearch(event.target.value)
                     }
                     style={{
-                        width: "100%",
+                        flex: 1,
+                        minWidth: 0,
                         height: 32,
                         padding: "0 10px",
                         border: "1px solid #CBD5E1",
@@ -338,6 +386,165 @@ export default function StationList({
                         outline: "none",
                     }}
                 />
+
+                <div className="station-status-filter">
+
+                    {/* Desktop / iPad */}
+                    <select
+                        className="station-status-filter-native"
+                        value={statusFilter}
+                        onChange={(event) =>
+                            setStatusFilter(
+                                event.target.value as
+                                    | "ALL"
+                                    | "PENDING"
+                                    | "COMPLETED",
+                            )
+                        }
+                        style={{
+                            width: "100%",
+                            height: 32,
+                            padding: "0 8px",
+                            border: "1px solid #CBD5E1",
+                            borderRadius: 7,
+                            background: "#FFFFFF",
+                            color: "#0F172A",
+                            fontSize: 12,
+                            boxSizing: "border-box",
+                            outline: "none",
+                        }}
+                    >
+                        <option value="ALL">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="COMPLETED">Complete</option>
+                    </select>
+
+                    {/* iPhone */}
+                    <div className="station-status-filter-mobile">
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setStatusFilterOpen(
+                                    (value) => !value,
+                                )
+                            }
+                            style={{
+                                width: "100%",
+                                height: 32,
+                                padding: "0 10px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                border: "1px solid #CBD5E1",
+                                borderRadius: 7,
+                                background: "#FFFFFF",
+                                color: "#0F172A",
+                                fontSize: 12,
+                                boxSizing: "border-box",
+                            }}
+                        >
+                            <span>
+                                {statusFilter === "ALL"
+                                    ? "All Status"
+                                    : statusFilter === "PENDING"
+                                    ? "Pending"
+                                    : "Complete"}
+                            </span>
+
+                            <span
+                                style={{
+                                    fontSize: 11,
+                                    lineHeight: 1,
+                                }}
+                            >
+                                {statusFilterOpen ? "▲" : "▼"}
+                            </span>
+                        </button>
+
+                        {statusFilterOpen && (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    top: "calc(100% + 4px)",
+                                    left: 0,
+                                    right: 0,
+                                    zIndex: 100,
+                                    padding: 4,
+                                    border: "1px solid #CBD5E1",
+                                    borderRadius: 7,
+                                    background: "#FFFFFF",
+                                    boxShadow:
+                                        "0 4px 12px rgba(15, 23, 42, 0.12)",
+                                    boxSizing: "border-box",
+                                }}
+                            >
+
+                                {[
+                                    ["ALL", "All Status"],
+                                    ["PENDING", "Pending"],
+                                    ["COMPLETED", "Complete"],
+                                ].map(([value, label]) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        onClick={() => {
+                                            setStatusFilter(
+                                                value as
+                                                    | "ALL"
+                                                    | "PENDING"
+                                                    | "COMPLETED",
+                                            );
+
+                                            setStatusFilterOpen(false);
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            height: 32,
+                                            padding: "0 8px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent:
+                                                "space-between",
+                                            border: 0,
+                                            borderRadius: 5,
+                                            background:
+                                                statusFilter === value
+                                                    ? "#EFF6FF"
+                                                    : "#FFFFFF",
+                                            color:
+                                                statusFilter === value
+                                                    ? "#2563EB"
+                                                    : "#0F172A",
+                                            fontSize: 12,
+                                            fontWeight:
+                                                statusFilter === value
+                                                    ? 600
+                                                    : 400,
+                                            textAlign: "left",
+                                        }}
+                                    >
+                                        <span>{label}</span>
+
+                                        {statusFilter === value && (
+                                            <span
+                                                style={{
+                                                    color: "#2563EB",
+                                                    fontWeight: 700,
+                                                }}
+                                            >
+                                                ✓
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+
+                            </div>
+                        )}
+
+                    </div>
+
+                </div>
             </div>
             <div
                 style={{
