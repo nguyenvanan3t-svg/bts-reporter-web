@@ -20,6 +20,7 @@ export type StationFtpScanResult = {
     stationCode: string;
 
     status: StationStatus;
+    dpn: boolean;
 
     survey: FtpResource;
     word: FtpResource;

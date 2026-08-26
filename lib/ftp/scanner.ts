@@ -6,6 +6,7 @@ import {
     getFtpExcelSources,
     upsertFtpExcelSources,
     upsertStationsFtpResources,
+    updateStationsDpn,
     updateStationsFromExcel,
 } from "@/features/stations/repository";
 
@@ -123,6 +124,7 @@ function createInitialStationResult(
     return {
         stationCode,
         status: "PENDING",
+        dpn: false,
         survey: createMissingResource(),
         word: createMissingResource(),
         visio: createMissingResource(),
@@ -384,6 +386,15 @@ async function scanDocuments(
                 item.type ===
                 FileType.Directory
             ) {
+
+                if (
+                    folderPath === hoSoPath &&
+                    item.name.toLowerCase() ===
+                        "logfile"
+                ) {
+                    continue;
+                }
+
                 await scanFolder(
                     itemPath,
                 );
@@ -465,6 +476,45 @@ async function scanDocuments(
     );
 
     return excelFiles;
+}
+
+async function scanLogfiles(
+    client: Awaited<ReturnType<typeof connectFtp>>,
+    hoSoPath: string,
+    stationResults: Map<string, StationFtpScanResult>,
+): Promise<void> {
+
+    const logfilePath =
+        `${hoSoPath}/Logfile`;
+
+    const logfileItems =
+        await client.list(
+            logfilePath,
+        );
+
+    for (const item of logfileItems) {
+
+        if (
+            item.type !==
+            FileType.Directory
+        ) {
+            continue;
+        }
+
+        const stationCode =
+            item.name.trim().toUpperCase();
+
+        const result =
+            stationResults.get(
+                stationCode,
+            );
+
+        if (!result) {
+            continue;
+        }
+
+        result.dpn = true;
+    }
 }
 
 async function scanExcelSources(
@@ -638,6 +688,13 @@ export async function scanProjectFtp(
             );
 
         if (hasHoSo) {
+
+            await scanLogfiles(
+                client,
+                hoSoPath,
+                stationResults,
+            );
+
             const excelFiles =
                 await scanDocuments(
                     client,
@@ -830,6 +887,27 @@ export async function scanProjectFtp(
 
         await upsertStationsFtpResources(
             ftpResourceUpdates,
+        );
+
+        const dpnUpdates =
+            stations.map(
+                (station) => {
+                    const result =
+                        stationResults.get(
+                            station.code,
+                        );
+
+                    return {
+                        stationId:
+                            station.id,
+                        hasDpn:
+                            result?.dpn ?? false,
+                    };
+                },
+            );
+
+        await updateStationsDpn(
+            dpnUpdates,
         );
 
         return {

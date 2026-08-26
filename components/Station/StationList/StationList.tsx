@@ -611,6 +611,10 @@ export default function StationList({
                                 PDF
                             </th>
 
+                            <th style={{ ...thStyle, ...columnStyles.resource }}>
+                                DPN
+                            </th>
+
                             <th style={{ ...thStyle, ...columnStyles.status }}>
                                 Status
                             </th>
@@ -622,164 +626,200 @@ export default function StationList({
                     </thead>
 
                     <tbody>
-                        {filteredStations.map((station, index) => (
-                            <tr key={station.id}>
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.index,
-                                    }}
-                                >
-                                    {index + 1}
-                                </td>
+                        {filteredStations.map((station, index) => {
+                            const hasDpn =
+                                ftpResults[station.code]?.dpn ??
+                                station.hasDpn;
 
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.station,
-                                    }}
-                                >
-                                    {station.code}
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.province,
-                                    }}
-                                >
-                                    {station.province}
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.resource,
-                                    }}
-                                >
-                                    <ResourceBadge
-                                        status={
-                                            ftpResults[station.code]
-                                                ?.survey.status ??
-                                            "UNKNOWN"
-                                        }
-                                    />
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.resource,
-                                    }}
-                                >
-                                    <ResourceBadge
-                                        status={
-                                            ftpResults[station.code]
-                                                ?.word.status ??
-                                            "UNKNOWN"
-                                        }
-                                    />
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.resource,
-                                    }}
-                                >
-                                    <ResourceBadge
-                                        status={
-                                            ftpResults[station.code]
-                                                ?.visio.status ??
-                                            "UNKNOWN"
-                                        }
-                                    />
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.resource,
-                                    }}
-                                >
-                                    <ResourceBadge
-                                        status={
-                                            ftpResults[station.code]
-                                                ?.pdf.status ??
-                                            "UNKNOWN"
-                                        }
-                                    />
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.status,
-                                    }}
-                                >
-                                    <StatusBadge
-                                        status={
-                                            ftpResults[station.code]?.status ??
-                                            (
-                                                ftpResults[station.code]?.pdf.status ===
-                                                "FOUND"
-                                                    ? "COMPLETED"
-                                                    : "PENDING"
-                                            )
-                                        }
-                                    />
-                                </td>
-
-                                <td
-                                    style={{
-                                        ...tdStyle,
-                                        ...columnStyles.action,
-                                    }}
-                                >
-
-                                    <div
+                            return (
+                                <tr key={station.id}>
+                                    <td
                                         style={{
-                                            display: "flex",
-                                            gap: 4,
-                                            alignItems: "center",
-                                            justifyContent: "center",
+                                            ...tdStyle,
+                                            ...columnStyles.index,
                                         }}
                                     >
+                                        {index + 1}
+                                    </td>
 
-                                        <Link
-                                            href={`/stations/${station.id}`}
-                                        >
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.station,
+                                        }}
+                                    >
+                                        {station.code}
+                                    </td>
 
-                                            <IconButton
-                                                title="Station Detail"
-                                                icon={
-                                                    <FolderOpen
-                                                        size={16}
-                                                        color="#2563eb"
-                                                    />
-                                                }
-                                            />
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.province,
+                                        }}
+                                    >
+                                        {station.province}
+                                    </td>
 
-                                        </Link>
-
-                                        <IconButton
-                                            title="Remove Station"
-                                            icon={
-                                                <Trash2
-                                                    size={16}
-                                                    color="#dc2626"
-                                                />
-                                            }
-                                            onClick={() =>
-                                                onDelete?.(station.id)
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.resource,
+                                        }}
+                                    >
+                                        <ResourceBadge
+                                            status={
+                                                ftpResults[station.code]
+                                                    ?.survey.status ??
+                                                "UNKNOWN"
                                             }
                                         />
+                                    </td>
 
-                                    </div>
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.resource,
+                                        }}
+                                    >
+                                        <ResourceBadge
+                                            status={
+                                                ftpResults[station.code]
+                                                    ?.word.status ??
+                                                "UNKNOWN"
+                                            }
+                                        />
+                                    </td>
 
-                                </td>
-                            </tr>
-                        ))}
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.resource,
+                                        }}
+                                    >
+                                        <ResourceBadge
+                                            status={
+                                                ftpResults[station.code]
+                                                    ?.visio.status ??
+                                                "UNKNOWN"
+                                            }
+                                        />
+                                    </td>
+
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.resource,
+                                        }}
+                                    >
+                                        <ResourceBadge
+                                            status={
+                                                ftpResults[station.code]
+                                                    ?.pdf.status ??
+                                                "UNKNOWN"
+                                            }
+                                        />
+                                    </td>
+
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.resource,
+                                        }}
+                                    >
+                                        <span
+                                            title={
+                                                hasDpn
+                                                    ? "Có Logfile đo phơi nhiễm"
+                                                    : "Không có Logfile đo phơi nhiễm"
+                                            }
+                                            style={{
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                width: 22,
+                                                height: 22,
+                                                borderRadius: 999,
+                                                background: hasDpn
+                                                    ? "#DCFCE7"
+                                                    : "#F1F5F9",
+                                                color: hasDpn
+                                                    ? "#15803D"
+                                                    : "#94A3B8",
+                                                fontSize: 14,
+                                                fontWeight: hasDpn
+                                                    ? 700
+                                                    : 600,
+                                                lineHeight: 1,
+                                            }}
+                                        >
+                                            {hasDpn ? "✓" : "-"}
+                                        </span>
+                                    </td>
+
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.status,
+                                        }}
+                                    >
+                                        <StatusBadge
+                                            status={
+                                                ftpResults[station.code]?.status ??
+                                                (
+                                                    ftpResults[station.code]?.pdf.status ===
+                                                    "FOUND"
+                                                        ? "COMPLETED"
+                                                        : "PENDING"
+                                                )
+                                            }
+                                        />
+                                    </td>
+
+                                    <td
+                                        style={{
+                                            ...tdStyle,
+                                            ...columnStyles.action,
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: 4,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            <Link
+                                                href={`/stations/${station.id}`}
+                                            >
+                                                <IconButton
+                                                    title="Station Detail"
+                                                    icon={
+                                                        <FolderOpen
+                                                            size={16}
+                                                            color="#2563eb"
+                                                        />
+                                                    }
+                                                />
+                                            </Link>
+
+                                            <IconButton
+                                                title="Remove Station"
+                                                icon={
+                                                    <Trash2
+                                                        size={16}
+                                                        color="#dc2626"
+                                                    />
+                                                }
+                                                onClick={() =>
+                                                    onDelete?.(station.id)
+                                                }
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

@@ -20,6 +20,8 @@ export interface Station {
 
     isRemoved: boolean;
 
+    hasDpn: boolean;
+
     project?: {
 
         id: string;

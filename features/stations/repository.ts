@@ -98,6 +98,7 @@ export async function getStationsByProject(
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         isRemoved: item.is_removed,
+        hasDpn: item.has_dpn ?? false,
     }));
 }
 
@@ -366,6 +367,7 @@ export async function getAllStationsByProject(
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         isRemoved: item.is_removed,
+        hasDpn: item.has_dpn ?? false,
     }));
 }
 
@@ -401,6 +403,7 @@ export async function getStationByProjectAndCode(
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         isRemoved: data.is_removed,
+        hasDpn: data.has_dpn ?? false,
     };
 }
 
@@ -515,6 +518,37 @@ export async function updateStationsFromExcel(
                             item.address,
                         excel_source:
                             item.excelSource,
+                    }),
+                ),
+            },
+        );
+
+    if (error) {
+        throw error;
+    }
+}
+
+export async function updateStationsDpn(
+    updates: Array<{
+        stationId: string;
+        hasDpn: boolean;
+    }>,
+): Promise<void> {
+
+    if (updates.length === 0) {
+        return;
+    }
+
+    const { error } =
+        await supabase.rpc(
+            "update_stations_dpn",
+            {
+                p_updates: updates.map(
+                    (item) => ({
+                        station_id:
+                            item.stationId,
+                        has_dpn:
+                            item.hasDpn,
                     }),
                 ),
             },
@@ -655,6 +689,7 @@ export async function getStationById(
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         isRemoved: data.is_removed,
+        hasDpn: data.has_dpn ?? false,
 
         project: data.project,
     };

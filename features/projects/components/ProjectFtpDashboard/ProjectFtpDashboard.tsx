@@ -134,7 +134,13 @@ export default function ProjectFtpDashboard({
     >([]);
 
     const loadResources =
-        useCallback(async () => {
+        useCallback(
+            async (
+                dpnOverrides?: Record<
+                    string,
+                    boolean
+                >,
+            ) => {
             try {
                 const response = await fetch(
                     `/api/projects/${project.id}/resources`,
@@ -198,7 +204,16 @@ export default function ProjectFtpDashboard({
                     ] = {
                         stationCode:
                             station.code,
+
                         ...resourcesForStation,
+
+                        dpn:
+                            dpnOverrides?.[
+                                station.code
+                            ] ??
+                            station.hasDpn ??
+                            false,
+
                         status:
                             violation
                                 ? "Vi phạm"
@@ -309,6 +324,18 @@ export default function ProjectFtpDashboard({
                     {},
                 );
 
+            const dpnOverrides =
+                Object.fromEntries(
+                    result.data.stations.map(
+                        (
+                            item: StationFtpScanResult,
+                        ) => [
+                            item.stationCode,
+                            item.dpn ?? false,
+                        ],
+                    ),
+                );
+
             setScanResults(
                 resultsByStation,
             );
@@ -319,7 +346,9 @@ export default function ProjectFtpDashboard({
                 new Date().toISOString(),
             );
 
-            await loadResources();
+            await loadResources(
+                dpnOverrides,
+            );
 
             toast.success(
                 `FTP scan completed. ${result.data.stations.length} stations checked.`,
