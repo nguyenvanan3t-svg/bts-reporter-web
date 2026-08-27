@@ -236,14 +236,6 @@ body {
    Chỉ thay đổi layout trên màn hình <= 480px.
    ========================================================= */
 
-.station-status-filter-native {
-  display: block !important;
-}
-
-.station-status-filter-mobile {
-  display: none !important;
-}
-
 @media (max-width: 480px) {
 
   .station-list-header {
@@ -283,21 +275,6 @@ body {
   }
 
   .station-list-search {
-    width: 100%;
-  }
-
-  .station-status-filter {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .station-status-filter-native {
-    display: none !important;
-  }
-
-  .station-status-filter-mobile {
-    display: block !important;
-    position: relative;
     width: 100%;
   }
 
