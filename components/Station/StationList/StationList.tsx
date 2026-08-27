@@ -4,14 +4,51 @@ import type { Station } from "@/features/stations/types";
 import type {
     StationFtpScanResult,
 } from "@/lib/ftp/types";
-import { useMemo, useState } from "react";
+import {
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/Button";
 import {
     FolderOpen,
     Trash2,
+    Filter,
 } from "lucide-react";
 import Link from "next/link";
 import IconButton from "@/components/ui/IconButton";
+
+type ResourceStatusFilter =
+    | "FOUND"
+    | "MISSING"
+    | "UNKNOWN";
+
+type DpnFilter =
+    | "FOUND"
+    | "MISSING";
+
+type StationStatusFilter =
+    | "PENDING"
+    | "COMPLETED"
+    | "Vi phạm";
+
+type StationColumnFilters = {
+    station: string;
+    province: string[];
+    survey: ResourceStatusFilter[];
+    word: ResourceStatusFilter[];
+    visio: ResourceStatusFilter[];
+    pdf: ResourceStatusFilter[];
+    dpn: DpnFilter[];
+    status: StationStatusFilter[];
+};
+
+type FilterOption = {
+    value: string;
+    label: string;
+};
 
 type Props = {
     stations: Station[];
@@ -39,6 +76,606 @@ type Props = {
 
     onImport?: () => void;
 };
+
+type ColumnFilterProps = {
+    label: string;
+    options: FilterOption[];
+    selected: string[];
+    onChange: (values: string[]) => void;
+    searchable?: boolean;
+    searchOnly?: boolean;
+};
+
+function ColumnFilter({
+    label,
+    options,
+    selected,
+    onChange,
+    searchable = false,
+    searchOnly = false,
+}: ColumnFilterProps) {
+    const [open, setOpen] =
+        useState(false);
+
+    const [search, setSearch] =
+        useState("");
+
+    const [popupPosition, setPopupPosition] =
+        useState({
+            top: 0,
+            left: 0,
+        });
+
+    const triggerRef =
+        useRef<HTMLButtonElement | null>(
+            null,
+        );
+
+    const popupRef =
+        useRef<HTMLDivElement | null>(
+            null,
+        );
+
+    const visibleOptions =
+        useMemo(() => {
+            const keyword =
+                search.trim().toLowerCase();
+
+            if (
+                searchable &&
+                !keyword
+            ) {
+                return options.slice(
+                    0,
+                    50,
+                );
+            }
+
+            if (!keyword) {
+                return options;
+            }
+
+            return options.filter(
+                (option) =>
+                    option.label
+                        .toLowerCase()
+                        .includes(keyword),
+            );
+        }, [
+            options,
+            search,
+            searchable,
+        ]);
+
+    useLayoutEffect(() => {
+        if (!open) {
+            setSearch("");
+            return;
+        }
+
+        if (searchOnly) {
+            setSearch(selected[0] ?? "");
+        }
+
+        const updatePosition = () => {
+            const trigger =
+                triggerRef.current;
+
+            const popup =
+                popupRef.current;
+
+            if (!trigger || !popup) {
+                return false;
+            }
+
+            const anchor =
+                trigger.parentElement?.parentElement ??
+                trigger;
+
+            const anchorRect =
+                anchor.getBoundingClientRect();
+
+            const popupRect =
+                popup.getBoundingClientRect();
+
+            const gap = 4;
+            const viewportPadding = 8;
+
+            let top =
+                anchorRect.bottom + gap;
+
+            if (
+                top + popupRect.height >
+                window.innerHeight -
+                    viewportPadding
+            ) {
+                top =
+                    anchorRect.top -
+                    popupRect.height -
+                    gap;
+            }
+
+            top = Math.max(
+                viewportPadding,
+                Math.min(
+                    top,
+                    window.innerHeight -
+                        popupRect.height -
+                        viewportPadding,
+                ),
+            );
+
+            let left =
+                anchorRect.left;
+
+            if (
+                left + popupRect.width >
+                window.innerWidth -
+                    viewportPadding
+            ) {
+                left =
+                    anchorRect.right -
+                    popupRect.width;
+            }
+
+            left = Math.max(
+                viewportPadding,
+                Math.min(
+                    left,
+                    window.innerWidth -
+                        popupRect.width -
+                        viewportPadding,
+                ),
+            );
+
+            setPopupPosition({
+                top,
+                left,
+            });
+
+            return true;
+        };
+
+        let frame1 = 0;
+        let frame2 = 0;
+
+        frame1 = requestAnimationFrame(() => {
+            frame2 = requestAnimationFrame(() => {
+                updatePosition();
+            });
+        });
+
+        window.addEventListener(
+            "resize",
+            updatePosition,
+        );
+
+        window.addEventListener(
+            "scroll",
+            updatePosition,
+            true,
+        );
+
+        return () => {
+            cancelAnimationFrame(frame1);
+            cancelAnimationFrame(frame2);
+
+            window.removeEventListener(
+                "resize",
+                updatePosition,
+            );
+
+            window.removeEventListener(
+                "scroll",
+                updatePosition,
+                true,
+            );
+        };
+    }, [open, searchOnly, selected]);
+
+    useLayoutEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        const handlePointerDown = (
+            event: PointerEvent,
+        ) => {
+            const target =
+                event.target as Node;
+
+            const trigger =
+                triggerRef.current;
+
+            const popup =
+                popupRef.current;
+
+            if (
+                trigger?.contains(target) ||
+                popup?.contains(target)
+            ) {
+                return;
+            }
+
+            setOpen(false);
+        };
+
+        document.addEventListener(
+            "pointerdown",
+            handlePointerDown,
+        );
+
+        return () => {
+            document.removeEventListener(
+                "pointerdown",
+                handlePointerDown,
+            );
+        };
+    }, [open]);
+
+    function toggleValue(
+        value: string,
+    ) {
+        if (selected.includes(value)) {
+            onChange(
+                selected.filter(
+                    (item) =>
+                        item !== value,
+                ),
+            );
+
+            return;
+        }
+
+        onChange([
+            ...selected,
+            value,
+        ]);
+    }
+
+    function selectAll() {
+        onChange(
+            options.map(
+                (option) =>
+                    option.value,
+            ),
+        );
+    }
+
+    function clearAll() {
+        onChange([]);
+    }
+
+    const allSelected =
+        options.length > 0 &&
+        selected.length ===
+            options.length;
+
+    return (
+        <div
+            style={{
+                position: "relative",
+                display: "inline-flex",
+            }}
+        >
+            <button
+                ref={triggerRef}
+                type="button"
+                title={`Filter ${label}`}
+                onClick={() => {
+                    const trigger =
+                        triggerRef.current;
+
+                    if (!trigger) {
+                        setOpen(
+                            (value) =>
+                                !value,
+                        );
+
+                        return;
+                    }
+
+                    const anchor =
+                        trigger.parentElement?.parentElement ??
+                        trigger;
+
+                    const anchorRect =
+                        anchor.getBoundingClientRect();
+
+                    setPopupPosition({
+                        top:
+                            anchorRect.bottom + 4,
+                        left:
+                            anchorRect.left,
+                    });
+
+                    setOpen(
+                        (value) =>
+                            !value,
+                    );
+                }}
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent:
+                        "center",
+                    gap: 3,
+                    border: 0,
+                    background:
+                        "transparent",
+                    padding: 2,
+                    margin: 0,
+                    cursor: "pointer",
+                    color:
+                        selected.length >
+                        0
+                            ? "#2563EB"
+                            : "#64748B",
+                }}
+            >
+                <Filter size={12} />
+
+                {selected.length >
+                    0 && (
+                    <span
+                        style={{
+                            fontSize: 9,
+                            fontWeight: 700,
+                        }}
+                    >
+                        {selected.length}
+                    </span>
+                )}
+            </button>
+
+            {open &&
+                typeof document !== "undefined" &&
+                createPortal(
+                    <div
+                        ref={popupRef}
+                        style={{
+                            position: "fixed",
+                            top: popupPosition.top,
+                            left: popupPosition.left,
+                            zIndex: 1000,
+                            minWidth: 190,
+                            maxWidth: 260,
+                            padding: 8,
+                            border:
+                                "1px solid #CBD5E1",
+                            borderRadius: 8,
+                            background:
+                                "#FFFFFF",
+                            boxShadow:
+                                "0 8px 24px rgba(15, 23, 42, 0.16)",
+                            maxHeight:
+                                "calc(100vh - 16px)",
+                            overflow: "hidden",
+                            boxSizing: "border-box",
+                        }}
+                    >
+                        <div
+                            style={{
+                                marginBottom: 6,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: "#0F172A",
+                            }}
+                        >
+                            {label}
+                        </div>
+
+                        {searchable && (
+                            <input
+                                type="text"
+                                placeholder={`Search ${label.toLowerCase()}...`}
+                                value={search}
+                                onChange={(
+                                    event,
+                                ) => {
+                                    const value =
+                                        event.target.value;
+
+                                    setSearch(value);
+
+                                    if (searchOnly) {
+                                        onChange(
+                                            value
+                                                ? [value]
+                                                : [],
+                                        );
+                                    }
+                                }}
+                                style={{
+                                    width: "100%",
+                                    height: 30,
+                                    padding:
+                                        "0 8px",
+                                    marginBottom: 6,
+                                    border:
+                                        "1px solid #CBD5E1",
+                                    borderRadius: 6,
+                                    fontSize: 11,
+                                    boxSizing:
+                                        "border-box",
+                                    outline:
+                                        "none",
+                                }}
+                            />
+                        )}
+
+                        {searchOnly ? (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearch("");
+                                    onChange([]);
+                                }}
+                                style={{
+                                    width: "100%",
+                                    height: 27,
+                                    border:
+                                        "1px solid #CBD5E1",
+                                    borderRadius: 5,
+                                    background:
+                                        "#FFFFFF",
+                                    color:
+                                        "#475569",
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                }}
+                            >
+                                Clear
+                            </button>
+                        ) : (
+                            <>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        gap: 6,
+                                        marginBottom: 6,
+                                    }}
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={selectAll}
+                                        style={{
+                                            flex: 1,
+                                            height: 27,
+                                            border:
+                                                "1px solid #CBD5E1",
+                                            borderRadius: 5,
+                                            background:
+                                                allSelected
+                                                    ? "#EFF6FF"
+                                                    : "#FFFFFF",
+                                            color:
+                                                allSelected
+                                                    ? "#2563EB"
+                                                    : "#475569",
+                                            fontSize: 10,
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Select All
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={clearAll}
+                                        style={{
+                                            flex: 1,
+                                            height: 27,
+                                            border:
+                                                "1px solid #CBD5E1",
+                                            borderRadius: 5,
+                                            background:
+                                                "#FFFFFF",
+                                            color:
+                                                "#475569",
+                                            fontSize: 10,
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+
+                                <div
+                                    style={{
+                                        maxHeight:
+                                            "calc(100vh - 180px)",
+                                        overflowY: "auto",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: 2,
+                                    }}
+                                >
+                                    {visibleOptions.map(
+                                        (option) => {
+                                            const checked =
+                                                selected.includes(
+                                                    option.value,
+                                                );
+
+                                            return (
+                                                <label
+                                                    key={
+                                                        option.value
+                                                    }
+                                                    style={{
+                                                        display:
+                                                            "flex",
+                                                        alignItems:
+                                                            "center",
+                                                        gap: 7,
+                                                        minHeight:
+                                                            30,
+                                                        padding:
+                                                            "0 5px",
+                                                        borderRadius:
+                                                            5,
+                                                        background:
+                                                            checked
+                                                                ? "#EFF6FF"
+                                                                : "#FFFFFF",
+                                                        cursor:
+                                                            "pointer",
+                                                        fontSize:
+                                                            11,
+                                                        color:
+                                                            "#0F172A",
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            checked
+                                                        }
+                                                        onChange={() =>
+                                                            toggleValue(
+                                                                option.value,
+                                                            )
+                                                        }
+                                                    />
+
+                                                    <span>
+                                                        {
+                                                            option.label
+                                                        }
+                                                    </span>
+                                                </label>
+                                            );
+                                        },
+                                    )}
+
+                                    {visibleOptions.length ===
+                                        0 && (
+                                        <div
+                                            style={{
+                                                padding:
+                                                    "8px 5px",
+                                                color:
+                                                    "#64748B",
+                                                fontSize:
+                                                    11,
+                                            }}
+                                        >
+                                            No results
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>,
+                    document.body,
+                )}
+        </div>
+    );
+}
 
 function StatusBadge({
     status,
@@ -184,15 +821,126 @@ export default function StationList({
     onImport,
 }: Props) {
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] =
-        useState<
-            "ALL" |
-            "PENDING" |
-            "COMPLETED" |
-            "Vi phạm"
-        >("ALL");
-    const [statusFilterOpen, setStatusFilterOpen] =
-        useState(false);
+    const [columnFilters, setColumnFilters] =
+        useState<StationColumnFilters>({
+            station: "",
+            province: [],
+            survey: [],
+            word: [],
+            visio: [],
+            pdf: [],
+            dpn: [],
+            status: [],
+        });
+
+    function clearAllFilters() {
+        setSearch("");
+
+        setColumnFilters({
+            station: "",
+            province: [],
+            survey: [],
+            word: [],
+            visio: [],
+            pdf: [],
+            dpn: [],
+            status: [],
+        });
+    }
+
+    const hasActiveFilters =
+        search.trim() !== "" ||
+        columnFilters.station !== "" ||
+        columnFilters.province.length > 0 ||
+        columnFilters.survey.length > 0 ||
+        columnFilters.word.length > 0 ||
+        columnFilters.visio.length > 0 ||
+        columnFilters.pdf.length > 0 ||
+        columnFilters.dpn.length > 0 ||
+        columnFilters.status.length > 0;
+
+    const provinceOptions =
+        useMemo<FilterOption[]>(() => {
+            return Array.from(
+                new Set(
+                    stations
+                        .map(
+                            (station) =>
+                                station.province,
+                        )
+                        .filter(Boolean),
+                ),
+            )
+                .sort((a, b) =>
+                    a.localeCompare(
+                        b,
+                        "vi",
+                    ),
+                )
+                .map((province) => ({
+                    value: province,
+                    label: province,
+                }));
+        }, [stations]);
+
+    const resourceFilterOptions:
+        FilterOption[] = [
+            {
+                value: "FOUND",
+                label: "Found",
+            },
+            {
+                value: "MISSING",
+                label: "Missing",
+            },
+            {
+                value: "UNKNOWN",
+                label: "Not scanned",
+            },
+        ];
+
+    const dpnFilterOptions:
+        FilterOption[] = [
+            {
+                value: "FOUND",
+                label: "Có",
+            },
+            {
+                value: "MISSING",
+                label: "Không",
+            },
+        ];
+
+    const statusFilterOptions:
+        FilterOption[] = [
+            {
+                value: "PENDING",
+                label: "Pending",
+            },
+            {
+                value: "COMPLETED",
+                label: "Complete",
+            },
+            {
+                value: "Vi phạm",
+                label: "Vi phạm",
+            },
+        ];
+
+    function updateColumnFilter<
+        K extends keyof StationColumnFilters,
+    >(
+        key: K,
+        values: StationColumnFilters[K],
+    ) {
+        setColumnFilters(
+            (current) => ({
+                ...current,
+                [key]: values,
+            }),
+        );
+    }
+
     const filteredStations = useMemo(() => {
 
         const keyword =
@@ -212,23 +960,116 @@ export default function StationList({
                     .toLowerCase()
                     .includes(keyword);
 
+            const matchesStation =
+                !columnFilters.station ||
+                station.code
+                    .toLowerCase()
+                    .includes(
+                        columnFilters.station
+                            .trim()
+                            .toLowerCase(),
+                    );
+
+            const matchesProvince =
+                columnFilters.province.length === 0 ||
+                columnFilters.province.includes(
+                    station.province,
+                );
+
+            const ftpResult =
+                ftpResults[station.code];
+
+            const surveyStatus =
+                ftpResult?.survey.status ??
+                "UNKNOWN";
+
+            const wordStatus =
+                ftpResult?.word.status ??
+                "UNKNOWN";
+
+            const visioStatus =
+                ftpResult?.visio.status ??
+                "UNKNOWN";
+
+            const pdfStatus =
+                ftpResult?.pdf.status ??
+                "UNKNOWN";
+
+            const hasDpn =
+                ftpResult?.dpn ??
+                station.hasDpn;
+
+            const dpnStatus =
+                hasDpn
+                    ? "FOUND"
+                    : "MISSING";
+
             const stationStatus =
-                ftpResults[station.code]?.status ??
+                ftpResult?.status ??
                 (
-                    ftpResults[station.code]?.pdf.status === "FOUND"
+                    ftpResult?.pdf.status ===
+                    "FOUND"
                         ? "COMPLETED"
                         : "PENDING"
                 );
 
-            const matchesStatus =
-                statusFilter === "ALL" ||
-                stationStatus === statusFilter;
+            const matchesSurvey =
+                columnFilters.survey.length === 0 ||
+                columnFilters.survey.includes(
+                    surveyStatus,
+                );
 
-            return matchesSearch && matchesStatus;
+            const matchesWord =
+                columnFilters.word.length === 0 ||
+                columnFilters.word.includes(
+                    wordStatus,
+                );
+
+            const matchesVisio =
+                columnFilters.visio.length === 0 ||
+                columnFilters.visio.includes(
+                    visioStatus,
+                );
+
+            const matchesPdf =
+                columnFilters.pdf.length === 0 ||
+                columnFilters.pdf.includes(
+                    pdfStatus,
+                );
+
+            const matchesDpn =
+                columnFilters.dpn.length === 0 ||
+                columnFilters.dpn.includes(
+                    dpnStatus,
+                );
+
+            const matchesStatus =
+                columnFilters.status.length === 0 ||
+                columnFilters.status.includes(
+                    stationStatus as StationStatusFilter,
+                );
+
+            return (
+                matchesSearch &&
+                matchesStation &&
+                matchesProvince &&
+                matchesSurvey &&
+                matchesWord &&
+                matchesVisio &&
+                matchesPdf &&
+                matchesDpn &&
+                matchesStatus
+            );
 
         });
 
-    }, [stations, search, statusFilter, ftpResults]);
+    }, [
+        stations,
+        search,
+        columnFilters,
+        ftpResults,
+    ]);
+
     return (
         <div>
             <div
@@ -402,170 +1243,36 @@ export default function StationList({
                     }}
                 />
 
-                <div className="station-status-filter">
-
-                    {/* Desktop / iPad */}
-                    <select
-                        className="station-status-filter-native"
-                        value={statusFilter}
-                        onChange={(event) =>
-                            setStatusFilter(
-                                event.target.value as
-                                    | "ALL"
-                                    | "PENDING"
-                                    | "COMPLETED"
-                                    | "Vi phạm",
-                            )
-                        }
-                        style={{
-                            width: "100%",
-                            height: 32,
-                            padding: "0 8px",
-                            border: "1px solid #CBD5E1",
-                            borderRadius: 7,
-                            background: "#FFFFFF",
-                            color: "#0F172A",
-                            fontSize: 12,
-                            boxSizing: "border-box",
-                            outline: "none",
-                        }}
-                    >
-                        <option value="ALL">All Status</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="COMPLETED">Complete</option>
-                        <option value="Vi phạm">Vi phạm</option>
-                    </select>
-
-                    {/* iPhone */}
-                    <div className="station-status-filter-mobile">
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setStatusFilterOpen(
-                                    (value) => !value,
-                                )
-                            }
-                            style={{
-                                width: "100%",
-                                height: 32,
-                                padding: "0 10px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                border: "1px solid #CBD5E1",
-                                borderRadius: 7,
-                                background: "#FFFFFF",
-                                color: "#0F172A",
-                                fontSize: 12,
-                                boxSizing: "border-box",
-                            }}
-                        >
-                            <span>
-                                {statusFilter === "ALL"
-                                    ? "All Status"
-                                    : statusFilter === "PENDING"
-                                    ? "Pending"
-                                    : statusFilter === "COMPLETED"
-                                    ? "Complete"
-                                    : "Vi phạm"}
-                            </span>
-
-                            <span
-                                style={{
-                                    fontSize: 11,
-                                    lineHeight: 1,
-                                }}
-                            >
-                                {statusFilterOpen ? "▲" : "▼"}
-                            </span>
-                        </button>
-
-                        {statusFilterOpen && (
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: "calc(100% + 4px)",
-                                    left: 0,
-                                    right: 0,
-                                    zIndex: 100,
-                                    padding: 4,
-                                    border: "1px solid #CBD5E1",
-                                    borderRadius: 7,
-                                    background: "#FFFFFF",
-                                    boxShadow:
-                                        "0 4px 12px rgba(15, 23, 42, 0.12)",
-                                    boxSizing: "border-box",
-                                }}
-                            >
-
-                                {[
-                                    ["ALL", "All Status"],
-                                    ["PENDING", "Pending"],
-                                    ["COMPLETED", "Complete"],
-                                    ["Vi phạm", "Vi phạm"],
-                                ].map(([value, label]) => (
-                                    <button
-                                        key={value}
-                                        type="button"
-                                        onClick={() => {
-                                            setStatusFilter(
-                                                value as
-                                                    | "ALL"
-                                                    | "PENDING"
-                                                    | "COMPLETED"
-                                                    | "Vi phạm",
-                                            );
-
-                                            setStatusFilterOpen(false);
-                                        }}
-                                        style={{
-                                            width: "100%",
-                                            height: 32,
-                                            padding: "0 8px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent:
-                                                "space-between",
-                                            border: 0,
-                                            borderRadius: 5,
-                                            background:
-                                                statusFilter === value
-                                                    ? "#EFF6FF"
-                                                    : "#FFFFFF",
-                                            color:
-                                                statusFilter === value
-                                                    ? "#2563EB"
-                                                    : "#0F172A",
-                                            fontSize: 12,
-                                            fontWeight:
-                                                statusFilter === value
-                                                    ? 600
-                                                    : 400,
-                                            textAlign: "left",
-                                        }}
-                                    >
-                                        <span>{label}</span>
-
-                                        {statusFilter === value && (
-                                            <span
-                                                style={{
-                                                    color: "#2563EB",
-                                                    fontWeight: 700,
-                                                }}
-                                            >
-                                                ✓
-                                            </span>
-                                        )}
-                                    </button>
-                                ))}
-
-                            </div>
-                        )}
-
-                    </div>
-
-                </div>
+                <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    disabled={!hasActiveFilters}
+                    style={{
+                        height: 32,
+                        padding: "0 14px",
+                        border:
+                            "1px solid #CBD5E1",
+                        borderRadius: 7,
+                        background:
+                            hasActiveFilters
+                                ? "#FFFFFF"
+                                : "#F8FAFC",
+                        color:
+                            hasActiveFilters
+                                ? "#475569"
+                                : "#94A3B8",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor:
+                            hasActiveFilters
+                                ? "pointer"
+                                : "default",
+                        whiteSpace:
+                            "nowrap",
+                    }}
+                >
+                    Clear Filters
+                </button>
             </div>
             <div
                 style={{
@@ -587,36 +1294,279 @@ export default function StationList({
                                 #
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.station }}>
-                                Station
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.station,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Station</span>
+
+                                    <ColumnFilter
+                                        label="Station"
+                                        options={[]}
+                                        selected={
+                                            columnFilters.station
+                                                ? [
+                                                    columnFilters.station,
+                                                ]
+                                                : []
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "station",
+                                                values[0] ?? "",
+                                            )
+                                        }
+                                        searchable
+                                        searchOnly
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.province }}>
-                                Province
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.province,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Province</span>
+
+                                    <ColumnFilter
+                                        label="Province"
+                                        options={provinceOptions}
+                                        selected={
+                                            columnFilters.province
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "province",
+                                                values,
+                                            )
+                                        }
+                                        searchable
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.resource }}>
-                                Survey
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.resource,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Survey</span>
+
+                                    <ColumnFilter
+                                        label="Survey"
+                                        options={
+                                            resourceFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.survey
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "survey",
+                                                values as ResourceStatusFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.resource }}>
-                                Word
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.resource,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Word</span>
+
+                                    <ColumnFilter
+                                        label="Word"
+                                        options={
+                                            resourceFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.word
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "word",
+                                                values as ResourceStatusFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.resource }}>
-                                Visio
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.resource,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Visio</span>
+
+                                    <ColumnFilter
+                                        label="Visio"
+                                        options={
+                                            resourceFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.visio
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "visio",
+                                                values as ResourceStatusFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.resource }}>
-                                PDF
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.resource,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>PDF</span>
+
+                                    <ColumnFilter
+                                        label="PDF"
+                                        options={
+                                            resourceFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.pdf
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "pdf",
+                                                values as ResourceStatusFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.resource }}>
-                                DPN
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.resource,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>DPN</span>
+
+                                    <ColumnFilter
+                                        label="DPN"
+                                        options={
+                                            dpnFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.dpn
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "dpn",
+                                                values as DpnFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
-                            <th style={{ ...thStyle, ...columnStyles.status }}>
-                                Status
+                            <th
+                                style={{
+                                    ...thStyle,
+                                    ...columnStyles.status,
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <span>Status</span>
+
+                                    <ColumnFilter
+                                        label="Status"
+                                        options={
+                                            statusFilterOptions
+                                        }
+                                        selected={
+                                            columnFilters.status
+                                        }
+                                        onChange={(values) =>
+                                            updateColumnFilter(
+                                                "status",
+                                                values as StationStatusFilter[],
+                                            )
+                                        }
+                                    />
+                                </div>
                             </th>
 
                             <th style={{ ...thStyle, ...columnStyles.action }}>
