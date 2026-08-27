@@ -15,6 +15,7 @@ import { connectFtp } from "./client";
 import type { FtpResourceType } from "./types";
 
 export type FtpDownloadResource =
+    | "dpn"
     | "survey"
     | "word"
     | "visio"

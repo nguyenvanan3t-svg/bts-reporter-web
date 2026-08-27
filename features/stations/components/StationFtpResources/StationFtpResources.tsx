@@ -31,6 +31,7 @@ type StationFtpResourcesProps = {
     stationId: string;
     projectId: string;
     stationCode: string;
+    hasDpn: boolean;
 };
 
 function formatFileSize(size?: number) {
@@ -67,9 +68,13 @@ export default function StationFtpResources({
     stationId,
     projectId,
     stationCode,
+    hasDpn,
 }: StationFtpResourcesProps) {
     const [resources, setResources] =
         useState<FtpResources | null>(null);
+
+    const [dpnFound, setDpnFound] =
+        useState(hasDpn);
 
     const [scanning, setScanning] =
         useState(false);
@@ -157,6 +162,9 @@ export default function StationFtpResources({
             }
 
             setResources(result.data);
+            setDpnFound(
+                result.data?.dpn === true,
+            );
         } catch (err) {
             console.error(
                 "Station FTP scan failed:",
@@ -193,6 +201,7 @@ export default function StationFtpResources({
     const downloadResource = useCallback(
         async (
             resource:
+                | "dpn"
                 | "survey"
                 | "word"
                 | "visio"
@@ -250,7 +259,9 @@ export default function StationFtpResources({
                     );
 
                 let fileName =
-                    resource === "survey"
+                    resource === "dpn"
+                        ? `${stationCode}.zip`
+                        : resource === "survey"
                         ? `${stationCode}.zip`
                         : resource === "word"
                         ? word.fileName ??
@@ -708,6 +719,72 @@ export default function StationFtpResources({
                         pdf.status !== "FOUND"
                     }
                 />
+            </div>
+
+            <div
+                style={{
+                    height: 16,
+                }}
+            />
+
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "10px 14px",
+                    background: "#FFFFFF",
+                    border: "1px solid #E2E8F0",
+                    borderRadius: 8,
+                }}
+            >
+                <div
+                    style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#334155",
+                    }}
+                >
+                    Logfile đo phơi nhiễm
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() =>
+                        void downloadResource("dpn")
+                    }
+                    disabled={
+                        !dpnFound ||
+                        downloading === "dpn"
+                    }
+                    style={{
+                        flexShrink: 0,
+                        border: 0,
+                        borderRadius: 7,
+                        padding: "7px 12px",
+                        background:
+                            dpnFound
+                                ? "#2563EB"
+                                : "#CBD5E1",
+                        color: "#FFFFFF",
+                        cursor:
+                            dpnFound &&
+                            downloading !== "dpn"
+                                ? "pointer"
+                                : "default",
+                        opacity:
+                            downloading === "dpn"
+                                ? 0.6
+                                : 1,
+                        fontWeight: 600,
+                        fontSize: 12,
+                    }}
+                >
+                    {downloading === "dpn"
+                        ? "Đang tải..."
+                        : "Tải về"}
+                </button>
             </div>
 
             <div

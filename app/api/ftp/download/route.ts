@@ -26,6 +26,7 @@ const projectRepository =
 
 const allowedResources =
     new Set<FtpDownloadResource>([
+        "dpn",
         "survey",
         "word",
         "visio",
@@ -137,30 +138,70 @@ export async function POST(
             );
         }
 
-        const resources =
-            await loadFtpResources(
-                station.id,
-            );
+        let ftpPath: string;
+        let ftpResourceType: "file" | "folder";
+        let ftpFileName: string | undefined;
 
-        const ftpResource =
-            resources[
-                resource as FtpDownloadResource
-            ];
+        if (resource === "dpn") {
 
-        if (
-            ftpResource.status !==
-                "FOUND" ||
-            !ftpResource.path ||
-            !ftpResource.type
-        ) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error:
-                        `${resource} is not available for station ${stationCode}.`,
-                },
-                { status: 404 },
-            );
+            if (!station.hasDpn) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        error:
+                            `DPN is not available for station ${stationCode}.`,
+                    },
+                    { status: 404 },
+                );
+            }
+
+            ftpPath =
+                `/Projects/${project.name}/Ho so/Logfile/${station.code}`;
+
+            ftpResourceType = "folder";
+            ftpFileName = undefined;
+
+        } else {
+
+            const resources =
+                await loadFtpResources(
+                    station.id,
+                );
+
+            const documentResource =
+                resource as
+                    | "survey"
+                    | "word"
+                    | "visio"
+                    | "pdf";
+
+            const ftpResource =
+                resources[documentResource];
+
+            if (
+                ftpResource.status !==
+                    "FOUND" ||
+                !ftpResource.path ||
+                !ftpResource.type
+            ) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        error:
+                            `${resource} is not available for station ${stationCode}.`,
+                    },
+                    { status: 404 },
+                );
+            }
+
+            ftpPath =
+                ftpResource.path;
+
+            ftpResourceType =
+                ftpResource.type;
+
+            ftpFileName =
+                ftpResource.fileName;
         }
 
         const download =
@@ -168,11 +209,10 @@ export async function POST(
                 resource:
                     resource as FtpDownloadResource,
                 resourceType:
-                    ftpResource.type,
-                ftpPath:
-                    ftpResource.path,
+                    ftpResourceType,
+                ftpPath,
                 fileName:
-                    ftpResource.fileName,
+                    ftpFileName,
             });
 
         const fileStream =

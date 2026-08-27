@@ -78,6 +78,7 @@ export default async function StationDetailPage({
                         stationId={station.id}
                         projectId={station.projectId}
                         stationCode={station.code}
+                        hasDpn={station.hasDpn}
                     />
 
                 }
