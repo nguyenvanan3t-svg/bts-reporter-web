@@ -69,13 +69,13 @@ export default function ProjectDashboardHeader({
             style={{
                 position: "relative",
                 overflow: "hidden",
-                marginBottom: 16,
-                padding: "16px 24px",
+                marginBottom: 14,
+                padding: "12px 20px",
                 border: "1px solid #DCE8F7",
-                borderRadius: 20,
+                borderRadius: 16,
                 background:
                     "linear-gradient(135deg, #EFF6FF 0%, #EAF3FF 55%, #F8FBFF 100%)",
-                boxShadow: "0 8px 28px rgba(37,99,235,.07)",
+                boxShadow: "0 6px 20px rgba(37,99,235,.06)",
             }}
         >
             <div
@@ -118,7 +118,7 @@ export default function ProjectDashboardHeader({
                 >
                     <div
                         style={{
-                            fontSize: 27,
+                            fontSize: 23,
                             fontWeight: 750,
                             lineHeight: 1.1,
                             color: "#102A56",
@@ -130,16 +130,14 @@ export default function ProjectDashboardHeader({
 
                     <div
                         style={{
-                            marginTop: 6,
-                            fontSize: 13,
-                            lineHeight: 1.4,
+                            marginTop: 4,
+                            fontSize: 12,
+                            lineHeight: 1.3,
                             color: "#4B6484",
                             maxWidth: 500,
                         }}
                     >
-                        Manage BTS survey projects, search station
-                        history and access engineering documents from
-                        a single workspace.
+                        Manage BTS projects, search, access documents.
                     </div>
                 </div>
 
@@ -148,7 +146,7 @@ export default function ProjectDashboardHeader({
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "flex-end",
-                        gap: 10,
+                        gap: 7,
                         flexShrink: 0,
                     }}
                 >
@@ -157,7 +155,7 @@ export default function ProjectDashboardHeader({
                     >
                         <div
                             style={{
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: "#31557F",
                             }}
                         >
@@ -173,8 +171,8 @@ export default function ProjectDashboardHeader({
                                 borderRadius: 9,
                                 background: "#FFFFFF",
                                 color: "#334155",
-                                padding: "8px 14px",
-                                fontSize: 13,
+                                padding: "5px 10px",
+                                fontSize: 12,
                                 fontWeight: 600,
                                 cursor: loggingOut
                                     ? "default"
@@ -185,7 +183,7 @@ export default function ProjectDashboardHeader({
                         >
                             {loggingOut
                                 ? "Logging out..."
-                                : "Đăng xuất"}
+                                : "Sign out"}
                         </button>
                     </div>
 
@@ -196,14 +194,12 @@ export default function ProjectDashboardHeader({
                             icon="folder"
                             title="Total Projects"
                             value={String(totalProjects)}
-                            caption="Projects"
                         />
 
                         <SummaryCard
                             icon="clock"
                             title="Last scan"
                             value={formatLastScan(lastScan)}
-                            caption="Latest scan time"
                         />
                     </div>
                 </div>
@@ -216,35 +212,33 @@ function SummaryCard({
     icon,
     title,
     value,
-    caption,
 }: {
     icon: "folder" | "clock";
     title: string;
     value: string;
-    caption: string;
 }) {
     return (
         <div
             className="project-dashboard-summary-card"
             style={{
-                minHeight: 78,
+                minHeight: 62,
                 boxSizing: "border-box",
-                padding: "10px 12px",
+                padding: "7px 9px",
                 border: "1px solid #E2E8F0",
-                borderRadius: 14,
+                borderRadius: 11,
                 background: "rgba(255,255,255,.92)",
                 boxShadow: "0 6px 18px rgba(15,23,42,.06)",
                 display: "grid",
-                gridTemplateColumns: "32px 1fr",
-                columnGap: 8,
+                gridTemplateColumns: "27px 1fr",
+                columnGap: 7,
                 alignItems: "center",
             }}
         >
             <div
                 style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 9,
+                    width: 27,
+                    height: 27,
+                    borderRadius: 8,
                     background:
                         icon === "folder"
                             ? "#E8F1FF"
@@ -302,7 +296,7 @@ function SummaryCard({
                 <div
                     className="project-dashboard-summary-value"
                     style={{
-                        fontSize: icon === "clock" ? 16 : 19,
+                        fontSize: icon === "clock" ? 14 : 17,
                         fontWeight: 750,
                         lineHeight: 1.1,
                         color: "#102A56",
@@ -315,16 +309,6 @@ function SummaryCard({
                     }}
                 >
                     {value}
-                </div>
-
-                <div
-                    style={{
-                        marginTop: 3,
-                        fontSize: 10,
-                        color: "#64748B",
-                    }}
-                >
-                    {caption}
                 </div>
             </div>
         </div>

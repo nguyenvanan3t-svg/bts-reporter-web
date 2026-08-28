@@ -92,6 +92,22 @@ body {
 /* Phone */
 @media (max-width: 600px) {
 
+  .project-dashboard-header-main {
+    gap: 10px;
+  }
+
+  .project-dashboard-header-account {
+    gap: 8px;
+  }
+
+  .project-dashboard-header-summary {
+    gap: 8px;
+  }
+
+  .project-dashboard-summary-card {
+    min-height: 58px !important;
+  }
+
   .project-dashboard-summary-value {
       line-height: 1.25;
       overflow-wrap: anywhere;
@@ -99,7 +115,7 @@ body {
 
   .project-dashboard-header-main {
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
   }
 
   .project-dashboard-header-account {
