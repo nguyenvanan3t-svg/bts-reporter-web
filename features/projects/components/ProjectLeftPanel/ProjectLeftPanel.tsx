@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import type { Project } from "@/features/projects/types";
 import ProjectCard from "../ProjectCard";
-import { useRouter } from "next/navigation";
+import ProjectYearGroup from "../ProjectYearGroup";
 
 type Props = {
     projects: Project[];
@@ -19,62 +21,60 @@ export default function ProjectLeftPanel({
 }: Props) {
     const router = useRouter();
 
+    const groupedProjects = useMemo(() => {
+        const groups = new Map<number, Project[]>();
+
+        for (const project of projects) {
+            const year = project.year;
+
+            if (!groups.has(year)) {
+                groups.set(year, []);
+            }
+
+            groups.get(year)!.push(project);
+        }
+
+        return Array.from(groups.entries()).sort(
+            ([yearA], [yearB]) =>
+                yearB - yearA,
+        );
+    }, [projects]);
+
     return (
-        <section
-            style={{
-                minWidth: 0,
-            }}
-        >
-            <div
-                style={{
-                    marginBottom: 6,
-                    fontSize: 24,
-                    fontWeight: 750,
-                    lineHeight: 1.2,
-                    color: "#102A56",
-                    letterSpacing: "-0.02em",
-                }}
-            >
-                Current Projects
+        <section>
+            <div className="section-title">
+                <div>
+                    <h2>Current Projects</h2>
+                    <p>
+                        Select a project to manage
+                        stations and engineering
+                        documents.
+                    </p>
+                </div>
             </div>
 
-            <div
-                style={{
-                    marginBottom: 20,
-                    color: "#64748B",
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                }}
-            >
-                Select a project to manage stations and engineering
-                documents.
-            </div>
-
-            <div
-                className="project-list-grid"
-            >
-                {projects.map((project) => (
-                    <ProjectCard
-                        key={project.id}
-                        id={project.id}
-                        code={project.code}
-                        name={project.name}
-                        customer={project.customer ?? ""}
-                        year={project.year}
-                        status={project.status}
-                        progress={
-                            progressByProject[project.id] ?? 0
+            {groupedProjects.map(
+                ([year, yearProjects], index) => (
+                    <ProjectYearGroup
+                        key={year}
+                        year={year}
+                        projects={yearProjects}
+                        progressByProject={
+                            progressByProject
                         }
-                        onClick={() =>
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        defaultOpen={index === 0}
+                        onProjectClick={(
+                            project,
+                        ) =>
                             router.push(
                                 `/projects/${project.id}`,
                             )
                         }
-                        onEdit={() => onEdit(project)}
-                        onDelete={() => onDelete(project)}
                     />
-                ))}
-            </div>
+                ),
+            )}
         </section>
     );
 }
