@@ -808,6 +808,190 @@ function ResourceBadge({
 
 }
 
+type FilterColumn =
+    | "station"
+    | "province"
+    | "survey"
+    | "word"
+    | "visio"
+    | "pdf"
+    | "dpn"
+    | "status";
+
+type StationFilterData = {
+    surveyStatus: ResourceStatusFilter;
+    wordStatus: ResourceStatusFilter;
+    visioStatus: ResourceStatusFilter;
+    pdfStatus: ResourceStatusFilter;
+    dpnStatus: DpnFilter;
+    stationStatus: StationStatusFilter;
+};
+
+function getStationFilterData(
+    station: Station,
+    ftpResults: Record<
+        string,
+        StationFtpScanResult
+    >,
+): StationFilterData {
+    const ftpResult =
+        ftpResults[station.code];
+
+    const surveyStatus: ResourceStatusFilter =
+        ftpResult?.survey.status ??
+        "UNKNOWN";
+
+    const wordStatus: ResourceStatusFilter =
+        ftpResult?.word.status ??
+        "UNKNOWN";
+
+    const visioStatus: ResourceStatusFilter =
+        ftpResult?.visio.status ??
+        "UNKNOWN";
+
+    const pdfStatus: ResourceStatusFilter =
+        ftpResult?.pdf.status ??
+        "UNKNOWN";
+
+    const hasDpn =
+        ftpResult?.dpn ??
+        station.hasDpn;
+
+    const dpnStatus: DpnFilter =
+        hasDpn
+            ? "FOUND"
+            : "MISSING";
+
+    const stationStatus: StationStatusFilter =
+        ftpResult?.status ??
+        (
+            ftpResult?.pdf.status ===
+            "FOUND"
+                ? "COMPLETED"
+                : "PENDING"
+        );
+
+    return {
+        surveyStatus,
+        wordStatus,
+        visioStatus,
+        pdfStatus,
+        dpnStatus,
+        stationStatus,
+    };
+}
+
+function matchesStationFilters(
+    station: Station,
+    ftpResults: Record<
+        string,
+        StationFtpScanResult
+    >,
+    search: string,
+    columnFilters: StationColumnFilters,
+    excludedColumn?: FilterColumn,
+): boolean {
+    const keyword =
+        search.trim().toLowerCase();
+
+    const {
+        surveyStatus,
+        wordStatus,
+        visioStatus,
+        pdfStatus,
+        dpnStatus,
+        stationStatus,
+    } =
+        getStationFilterData(
+            station,
+            ftpResults,
+        );
+
+    const matchesSearch =
+        !keyword ||
+        station.code
+            .toLowerCase()
+            .includes(keyword) ||
+        station.province
+            .toLowerCase()
+            .includes(keyword) ||
+        station.address
+            .toLowerCase()
+            .includes(keyword);
+
+    const matchesStation =
+        excludedColumn === "station" ||
+        !columnFilters.station ||
+        station.code
+            .toLowerCase()
+            .includes(
+                columnFilters.station
+                    .trim()
+                    .toLowerCase(),
+            );
+
+    const matchesProvince =
+        excludedColumn === "province" ||
+        columnFilters.province.length === 0 ||
+        columnFilters.province.includes(
+            station.province,
+        );
+
+    const matchesSurvey =
+        excludedColumn === "survey" ||
+        columnFilters.survey.length === 0 ||
+        columnFilters.survey.includes(
+            surveyStatus,
+        );
+
+    const matchesWord =
+        excludedColumn === "word" ||
+        columnFilters.word.length === 0 ||
+        columnFilters.word.includes(
+            wordStatus,
+        );
+
+    const matchesVisio =
+        excludedColumn === "visio" ||
+        columnFilters.visio.length === 0 ||
+        columnFilters.visio.includes(
+            visioStatus,
+        );
+
+    const matchesPdf =
+        excludedColumn === "pdf" ||
+        columnFilters.pdf.length === 0 ||
+        columnFilters.pdf.includes(
+            pdfStatus,
+        );
+
+    const matchesDpn =
+        excludedColumn === "dpn" ||
+        columnFilters.dpn.length === 0 ||
+        columnFilters.dpn.includes(
+            dpnStatus,
+        );
+
+    const matchesStatus =
+        excludedColumn === "status" ||
+        columnFilters.status.length === 0 ||
+        columnFilters.status.includes(
+            stationStatus,
+        );
+
+    return (
+        matchesSearch &&
+        matchesStation &&
+        matchesProvince &&
+        matchesSurvey &&
+        matchesWord &&
+        matchesVisio &&
+        matchesPdf &&
+        matchesDpn &&
+        matchesStatus
+    );
+}
+
 export default function StationList({
     stations,
     ftpResults = {},
@@ -858,30 +1042,6 @@ export default function StationList({
         columnFilters.pdf.length > 0 ||
         columnFilters.dpn.length > 0 ||
         columnFilters.status.length > 0;
-
-    const provinceOptions =
-        useMemo<FilterOption[]>(() => {
-            return Array.from(
-                new Set(
-                    stations
-                        .map(
-                            (station) =>
-                                station.province,
-                        )
-                        .filter(Boolean),
-                ),
-            )
-                .sort((a, b) =>
-                    a.localeCompare(
-                        b,
-                        "vi",
-                    ),
-                )
-                .map((province) => ({
-                    value: province,
-                    label: province,
-                }));
-        }, [stations]);
 
     const resourceFilterOptions:
         FilterOption[] = [
@@ -941,134 +1101,239 @@ export default function StationList({
         );
     }
 
-    const filteredStations = useMemo(() => {
-
-        const keyword =
-            search.trim().toLowerCase();
-
-        return stations.filter((station) => {
-
-            const matchesSearch =
-                !keyword ||
-                station.code
-                    .toLowerCase()
-                    .includes(keyword) ||
-                station.province
-                    .toLowerCase()
-                    .includes(keyword) ||
-                station.address
-                    .toLowerCase()
-                    .includes(keyword);
-
-            const matchesStation =
-                !columnFilters.station ||
-                station.code
-                    .toLowerCase()
-                    .includes(
-                        columnFilters.station
-                            .trim()
-                            .toLowerCase(),
+    const filterOptions =
+        useMemo(() => {
+            const getAvailableStations =
+                (
+                    excludedColumn: FilterColumn,
+                ) =>
+                    stations.filter(
+                        (station) =>
+                            matchesStationFilters(
+                                station,
+                                ftpResults,
+                                search,
+                                columnFilters,
+                                excludedColumn,
+                            ),
                     );
 
-            const matchesProvince =
-                columnFilters.province.length === 0 ||
-                columnFilters.province.includes(
-                    station.province,
+            const provinceStations =
+                getAvailableStations(
+                    "province",
                 );
 
-            const ftpResult =
-                ftpResults[station.code];
+            const surveyStations =
+                getAvailableStations(
+                    "survey",
+                );
 
-            const surveyStatus =
-                ftpResult?.survey.status ??
-                "UNKNOWN";
+            const wordStations =
+                getAvailableStations(
+                    "word",
+                );
 
-            const wordStatus =
-                ftpResult?.word.status ??
-                "UNKNOWN";
+            const visioStations =
+                getAvailableStations(
+                    "visio",
+                );
 
-            const visioStatus =
-                ftpResult?.visio.status ??
-                "UNKNOWN";
+            const pdfStations =
+                getAvailableStations(
+                    "pdf",
+                );
 
-            const pdfStatus =
-                ftpResult?.pdf.status ??
-                "UNKNOWN";
+            const dpnStations =
+                getAvailableStations(
+                    "dpn",
+                );
 
-            const hasDpn =
-                ftpResult?.dpn ??
-                station.hasDpn;
+            const statusStations =
+                getAvailableStations(
+                    "status",
+                );
 
-            const dpnStatus =
-                hasDpn
-                    ? "FOUND"
-                    : "MISSING";
+            const provinceValues =
+                Array.from(
+                    new Set(
+                        provinceStations
+                            .map(
+                                (station) =>
+                                    station.province,
+                            )
+                            .filter(Boolean),
+                    ),
+                ).sort((a, b) =>
+                    a.localeCompare(
+                        b,
+                        "vi",
+                    ),
+                );
 
-            const stationStatus =
-                ftpResult?.status ??
+            const buildResourceOptions =
                 (
-                    ftpResult?.pdf.status ===
-                    "FOUND"
-                        ? "COMPLETED"
-                        : "PENDING"
-                );
+                    availableStations: Station[],
+                    resource:
+                        | "survey"
+                        | "word"
+                        | "visio"
+                        | "pdf",
+                ): FilterOption[] => {
+                    const availableStatuses =
+                        new Set(
+                            availableStations.map(
+                                (station) =>
+                                    getStationFilterData(
+                                        station,
+                                        ftpResults,
+                                    )[
+                                        `${resource}Status`
+                                    ],
+                            ),
+                        );
 
-            const matchesSurvey =
-                columnFilters.survey.length === 0 ||
-                columnFilters.survey.includes(
-                    surveyStatus,
-                );
+                    return resourceFilterOptions.filter(
+                        (option) =>
+                            availableStatuses.has(
+                                option.value as ResourceStatusFilter,
+                            ),
+                    );
+                };
 
-            const matchesWord =
-                columnFilters.word.length === 0 ||
-                columnFilters.word.includes(
-                    wordStatus,
-                );
+            const buildDpnOptions =
+                (
+                    availableStations: Station[],
+                ): FilterOption[] => {
+                    const availableStatuses =
+                        new Set(
+                            availableStations.map(
+                                (station) =>
+                                    getStationFilterData(
+                                        station,
+                                        ftpResults,
+                                    ).dpnStatus,
+                            ),
+                        );
 
-            const matchesVisio =
-                columnFilters.visio.length === 0 ||
-                columnFilters.visio.includes(
-                    visioStatus,
-                );
+                    return dpnFilterOptions.filter(
+                        (option) =>
+                            availableStatuses.has(
+                                option.value as DpnFilter,
+                            ),
+                    );
+                };
 
-            const matchesPdf =
-                columnFilters.pdf.length === 0 ||
-                columnFilters.pdf.includes(
-                    pdfStatus,
-                );
+            const buildStatusOptions =
+                (
+                    availableStations: Station[],
+                ): FilterOption[] => {
+                    const availableStatuses =
+                        new Set(
+                            availableStations.map(
+                                (station) =>
+                                    getStationFilterData(
+                                        station,
+                                        ftpResults,
+                                    ).stationStatus,
+                            ),
+                        );
 
-            const matchesDpn =
-                columnFilters.dpn.length === 0 ||
-                columnFilters.dpn.includes(
-                    dpnStatus,
-                );
+                    return statusFilterOptions.filter(
+                        (option) =>
+                            availableStatuses.has(
+                                option.value as StationStatusFilter,
+                            ),
+                    );
+                };
 
-            const matchesStatus =
-                columnFilters.status.length === 0 ||
-                columnFilters.status.includes(
-                    stationStatus as StationStatusFilter,
-                );
+            return {
+                province:
+                    provinceValues.map(
+                        (province) => ({
+                            value: province,
+                            label: province,
+                        }),
+                    ),
 
-            return (
-                matchesSearch &&
-                matchesStation &&
-                matchesProvince &&
-                matchesSurvey &&
-                matchesWord &&
-                matchesVisio &&
-                matchesPdf &&
-                matchesDpn &&
-                matchesStatus
+                survey:
+                    buildResourceOptions(
+                        surveyStations,
+                        "survey",
+                    ),
+
+                word:
+                    buildResourceOptions(
+                        wordStations,
+                        "word",
+                    ),
+
+                visio:
+                    buildResourceOptions(
+                        visioStations,
+                        "visio",
+                    ),
+
+                pdf:
+                    buildResourceOptions(
+                        pdfStations,
+                        "pdf",
+                    ),
+
+                dpn:
+                    buildDpnOptions(
+                        dpnStations,
+                    ),
+
+                status:
+                    buildStatusOptions(
+                        statusStations,
+                    ),
+            };
+        }, [
+            stations,
+            search,
+            columnFilters,
+            ftpResults,
+        ]);
+
+    const provinceOptions =
+        filterOptions.province;
+
+    const surveyOptions =
+        filterOptions.survey;
+
+    const wordOptions =
+        filterOptions.word;
+
+    const visioOptions =
+        filterOptions.visio;
+
+    const pdfOptions =
+        filterOptions.pdf;
+
+    const dpnOptions =
+        filterOptions.dpn;
+
+    const statusOptions =
+        filterOptions.status;
+
+    const filteredStations =
+        useMemo(() => {
+            return stations.filter(
+                (station) =>
+                    matchesStationFilters(
+                        station,
+                        ftpResults,
+                        search,
+                        columnFilters,
+                    ),
             );
-
-        });
-
-    }, [
-        stations,
-        search,
-        columnFilters,
-        ftpResults,
-    ]);
+        }, [
+            stations,
+            search,
+            columnFilters,
+            ftpResults,
+        ]);
 
     return (
         <div>
@@ -1384,7 +1649,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="Survey"
                                         options={
-                                            resourceFilterOptions
+                                            surveyOptions
                                         }
                                         selected={
                                             columnFilters.survey
@@ -1418,7 +1683,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="Word"
                                         options={
-                                            resourceFilterOptions
+                                            wordOptions
                                         }
                                         selected={
                                             columnFilters.word
@@ -1452,7 +1717,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="Visio"
                                         options={
-                                            resourceFilterOptions
+                                            visioOptions
                                         }
                                         selected={
                                             columnFilters.visio
@@ -1486,7 +1751,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="PDF"
                                         options={
-                                            resourceFilterOptions
+                                            pdfOptions
                                         }
                                         selected={
                                             columnFilters.pdf
@@ -1520,7 +1785,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="DPN"
                                         options={
-                                            dpnFilterOptions
+                                            dpnOptions
                                         }
                                         selected={
                                             columnFilters.dpn
@@ -1554,7 +1819,7 @@ export default function StationList({
                                     <ColumnFilter
                                         label="Status"
                                         options={
-                                            statusFilterOptions
+                                            statusOptions
                                         }
                                         selected={
                                             columnFilters.status
