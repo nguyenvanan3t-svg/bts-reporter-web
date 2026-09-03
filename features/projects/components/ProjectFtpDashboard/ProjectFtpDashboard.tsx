@@ -21,7 +21,7 @@ import type {
     StationFtpScanResult,
 } from "@/lib/ftp/types";
 
-import { exportStationsCsv } from "@/features/stations/export";
+import { exportStationsExcel } from "@/features/stations/export";
 import {
     importStationExcel,
 } from "@/features/stations/excel/service";
@@ -413,13 +413,13 @@ export default function ProjectFtpDashboard({
     }
 
     function handleExport() {
-        exportStationsCsv(
+        exportStationsExcel(
             stations,
             `${project.code}_${project.name}_Stations`,
         );
 
         toast.success(
-            "CSV exported successfully.",
+            "Excel exported successfully.",
         );
     }
 

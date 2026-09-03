@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { exportStationsCsv } from "@/features/stations/export";
+import { exportStationsExcel } from "@/features/stations/export";
 
 import {
     importStationExcel,
@@ -113,7 +113,7 @@ export default function ProjectStations({
 
     function handleExport() {
 
-        exportStationsCsv(
+        exportStationsExcel(
             stations,
             `${project.code}_${project.name}_Stations`,
         );

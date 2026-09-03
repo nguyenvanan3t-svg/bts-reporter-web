@@ -1,63 +1,64 @@
+import * as XLSX from "xlsx";
 import type { Station } from "./types";
 
-export function exportStationsCsv(
+export function exportStationsExcel(
     stations: Station[],
     fileName: string,
 ) {
-
     const rows = [
         [
-            "Station",
-            "Province",
-            "Address",
-            "Status",
+            "STT",
+            "Mã trạm",
+            "Tỉnh / TP",
+            "Địa chỉ lắp đặt",
+            "Địa chỉ đội đo",
+            "Ghi chú",
+            "Date",
         ],
 
-        ...stations.map((station) => [
-
-            station.code,
-
-            station.province,
-
-            station.address,
-
-            station.status,
-
-        ]),
-
+        ...stations.map(
+            (station, index) => [
+                index + 1,
+                station.code,
+                station.province,
+                station.address,
+                "",
+                "",
+                "",
+            ],
+        ),
     ];
 
-    const csv = rows
-        .map((row) =>
-            row
-                .map((cell) => `"${cell ?? ""}"`)
-                .join(","),
-        )
-        .join("\n");
+    const worksheet =
+        XLSX.utils.aoa_to_sheet(rows);
 
-    const blob = new Blob(
-        ["\uFEFF" + csv],
-        {
-            type: "text/csv;charset=utf-8;",
-        },
+    worksheet["!cols"] = [
+        { wch: 8 },
+        { wch: 16 },
+        { wch: 20 },
+        { wch: 70 },
+        { wch: 30 },
+        { wch: 30 },
+        { wch: 15 },
+    ];
+
+    const workbook =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Sheet1",
     );
 
-    const url = URL.createObjectURL(blob);
+    const safeFileName =
+        fileName.replace(
+            /[\\/:*?"<>|]/g,
+            "_",
+        );
 
-    const link =
-        document.createElement("a");
-
-    link.href = url;
-
-    const safeFileName = fileName.replace(
-        /[\\/:*?"<>|]/g,
-        "_",
+    XLSX.writeFile(
+        workbook,
+        `${safeFileName}.xlsx`,
     );
-
-    link.download = `${safeFileName}.csv`;
-
-    link.click();
-
-    URL.revokeObjectURL(url);
-
 }
