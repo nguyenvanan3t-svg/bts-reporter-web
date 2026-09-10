@@ -72,6 +72,83 @@ function isViolationResource(
     );
 }
 
+function getSurveyPerformer(
+    stationCode: string,
+    survey: {
+        status?: string;
+        fileName?: string;
+        type?: string;
+        path?: string;
+    } | undefined,
+): string {
+    if (
+        survey?.status !== "FOUND"
+    ) {
+        return "Unknown";
+    }
+
+    /*
+     * Survey ZIP:
+     *
+     * Tuan_NAN0366.zip
+     *        ↓
+     * performer = Tuan
+     *
+     * NAN0366.zip
+     *        ↓
+     * performer = Unknown
+     */
+
+    if (survey.type === "file" && survey.fileName) {
+        const fileName =
+            survey.fileName.trim();
+
+        const baseName =
+            fileName.replace(
+                /\.[^.]+$/,
+                "",
+            );
+
+        const suffix =
+            `_${stationCode}`;
+
+        if (
+            baseName
+                .toUpperCase()
+                .endsWith(
+                    suffix.toUpperCase(),
+                )
+        ) {
+            const performer =
+                baseName
+                    .slice(
+                        0,
+                        -suffix.length,
+                    )
+                    .trim();
+
+            if (performer) {
+                return performer;
+            }
+        }
+
+        return "Unknown";
+    }
+
+    /*
+     * Survey dạng folder:
+     *
+     * NAN0366
+     * 123 - NAN0366
+     *
+     * Theo quy định:
+     * không có prefix người thực hiện
+     * → Unknown
+     */
+
+    return "Unknown";
+}
+
 type ProjectFtpScanHistoryItem = {
     id: string;
     startedAt: string;
@@ -273,6 +350,55 @@ export default function ProjectFtpDashboard({
             ).length,
         };
     }, [scanResults]);
+
+    const surveyPerformerProgress =
+        useMemo(() => {
+            const counts =
+                new Map<string, number>();
+
+            for (const station of stations) {
+                const result =
+                    scanResults[station.code];
+
+                if (
+                    result?.survey?.status !==
+                    "FOUND"
+                ) {
+                    continue;
+                }
+
+                const performer =
+                    getSurveyPerformer(
+                        station.code,
+                        result.survey,
+                    );
+
+                counts.set(
+                    performer,
+                    (counts.get(performer) ?? 0) + 1,
+                );
+            }
+
+            return Array.from(
+                counts.entries(),
+            )
+                .map(
+                    ([
+                        performer,
+                        count,
+                    ]) => ({
+                        performer,
+                        count,
+                    }),
+                )
+                .sort(
+                    (a, b) =>
+                        b.count - a.count ||
+                        a.performer.localeCompare(
+                            b.performer,
+                        ),
+                );
+        }, [stations, scanResults]);
 
     async function handleScanFtp() {
         if (scanning) {
@@ -798,6 +924,100 @@ export default function ProjectFtpDashboard({
                                                 ))}
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Tiến độ theo người thực hiện */}
+                            {hasScanned && (
+                                <div className="mt-3 border-t border-slate-200 pt-3">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <div className="text-xs font-semibold text-slate-800">
+                                            Survey Progress by Person
+                                        </div>
+
+                                        <div className="text-[10px] text-slate-400">
+                                            {surveyPerformerProgress.reduce(
+                                                (sum, item) => sum + item.count,
+                                                0,
+                                            )}{" "}
+                                            Survey
+                                        </div>
+                                    </div>
+
+                                    {surveyPerformerProgress.length === 0 ? (
+                                        <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[10px] text-slate-500">
+                                            No Survey data
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-hidden rounded-md border border-slate-200">
+                                            {/* Header */}
+                                            <div
+                                                className="grid items-center bg-slate-50 px-2 py-1.5 text-[10px] font-semibold text-slate-500"
+                                                style={{
+                                                    gridTemplateColumns:
+                                                        "28px minmax(0, 1fr) 56px",
+                                                }}
+                                            >
+                                                <div className="text-center">
+                                                    #
+                                                </div>
+
+                                                <div>
+                                                    Performer
+                                                </div>
+
+                                                <div className="text-right">
+                                                    Survey
+                                                </div>
+                                            </div>
+
+                                            {/* Rows */}
+                                            <div className="divide-y divide-slate-100">
+                                                {surveyPerformerProgress.map(
+                                                    (item, index) => (
+                                                        <div
+                                                            key={item.performer}
+                                                            className="grid items-center bg-white px-2 py-1.5 text-[10px] hover:bg-slate-50"
+                                                            style={{
+                                                                gridTemplateColumns:
+                                                                    "28px minmax(0, 1fr) 56px",
+                                                            }}
+                                                        >
+                                                            {/* Rank */}
+                                                            <div className="text-center text-slate-400">
+                                                                {index + 1}
+                                                            </div>
+
+                                                            {/* Performer */}
+                                                            <div
+                                                                className="min-w-0 font-medium text-slate-700"
+                                                                title={
+                                                                    item.performer
+                                                                }
+                                                                style={{
+                                                                    overflow:
+                                                                        "hidden",
+                                                                    textOverflow:
+                                                                        "ellipsis",
+                                                                    whiteSpace:
+                                                                        "nowrap",
+                                                                }}
+                                                            >
+                                                                {item.performer}
+                                                            </div>
+
+                                                            {/* Survey count */}
+                                                            <div className="flex justify-end">
+                                                                <span className="inline-flex min-w-[32px] items-center justify-center rounded-md bg-blue-50 px-1.5 py-0.5 font-semibold text-blue-700">
+                                                                    {item.count}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
