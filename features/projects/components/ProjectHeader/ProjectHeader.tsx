@@ -1,5 +1,6 @@
 import type { Project } from "../../types";
 import Link from "next/link";
+import NavigationLink from "@/components/ui/NavigationLink";
 
 interface ProjectHeaderProps {
     project: Project;
@@ -436,9 +437,10 @@ export default function ProjectHeader({
                 </div>
 
                 {/* Back button */}
-                <Link
+                <NavigationLink
                     href="/projects"
                     className="project-header-back"
+                    loadingText="Opening..."
                     style={{
                         display: "inline-flex",
                         alignItems: "center",
@@ -460,7 +462,7 @@ export default function ProjectHeader({
                 >
                     <span>←</span>
                     Back to Projects
-                </Link>
+                </NavigationLink>
             </div>
         </header>
     );

@@ -1,3 +1,6 @@
+"use client";
+import { useState } from "react";
+
 type Props = {
     id?: string;
 
@@ -30,19 +33,96 @@ export default function ProjectCard({
     onEdit,
     onDelete,
 }: Props) {
+    const [opening, setOpening] =
+        useState(false);
+
+    function handleCardClick() {
+        if (!onClick || opening) {
+            return;
+        }
+
+        /*
+         * Phản hồi UI ngay lập tức.
+         * Người dùng biết click đã được nhận.
+         */
+        setOpening(true);
+
+        onClick();
+    }
+
     return (
         <div
-            onClick={onClick}
+            onClick={handleCardClick}
             style={{
                 background: "#FFFFFF",
                 border: "1px solid #E5E7EB",
                 borderRadius: 14,
                 overflow: "hidden",
-                boxShadow: "0 2px 10px rgba(15,23,42,.06)",
-                cursor: onClick ? "pointer" : "default",
-                transition: "all .2s ease",
+                cursor:
+                    onClick && !opening
+                        ? "pointer"
+                        : "default",
+
+                transition:
+                    "transform .1s ease, opacity .15s ease, box-shadow .15s ease",
+
+                opacity: opening ? 0.72 : 1,
+
+                transform:
+                    opening
+                        ? "scale(0.985)"
+                        : "scale(1)",
+
+                boxShadow: opening
+                    ? "0 2px 8px rgba(15,23,42,.04)"
+                    : "0 2px 10px rgba(15,23,42,.06)",
+
+                position: "relative",
             }}
         >
+            {opening && (
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        zIndex: 20,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background:
+                            "rgba(255,255,255,.78)",
+                        backdropFilter: "blur(1.5px)",
+                        WebkitBackdropFilter:
+                            "blur(1.5px)",
+                        borderRadius: 14,
+                    }}
+                >
+                    <div
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "8px 12px",
+                            borderRadius: 9,
+                            background: "#ffffff",
+                            border: "1px solid #dbe3ef",
+                            boxShadow:
+                                "0 4px 14px rgba(15,23,42,.10)",
+                            color: "#334155",
+                            fontSize: 12,
+                            fontWeight: 600,
+                        }}
+                    >
+                        <span
+                            className="button-loading-spinner"
+                            aria-hidden="true"
+                        />
+
+                        Opening...
+                    </div>
+                </div>
+            )}
+
             <div
                 style={{
                     padding: "9px 12px",

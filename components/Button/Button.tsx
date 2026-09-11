@@ -91,8 +91,8 @@ export default function Button({
             {...props}
             type={props.type ?? "button"}
             disabled={disabled || loading}
+            aria-busy={loading}
             style={{
-
                 minWidth: 0,
 
                 borderRadius: 10,
@@ -108,7 +108,7 @@ export default function Button({
                         : 1,
 
                 transition:
-                    "all .2s ease",
+                    "transform .08s ease, opacity .15s ease, box-shadow .15s ease",
 
                 display: "inline-flex",
 
@@ -119,6 +119,9 @@ export default function Button({
                 whiteSpace: "nowrap",
 
                 userSelect: "none",
+
+                WebkitTapHighlightColor:
+                    "transparent",
 
                 ...variantStyle,
 
@@ -139,12 +142,9 @@ export default function Button({
             >
                 {loading && (
                     <span
-                        style={{
-                            fontSize: "0.9em",
-                        }}
-                    >
-                        ⏳
-                    </span>
+                        className="button-loading-spinner"
+                        aria-hidden="true"
+                    />
                 )}
 
                 {!loading && startIcon}

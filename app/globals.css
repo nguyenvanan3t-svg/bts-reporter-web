@@ -296,3 +296,63 @@ body {
 
 }
 
+/* =========================================================
+   Button interaction / loading
+   Phản hồi ngay khi người dùng nhấn nút.
+   ========================================================= */
+
+.button-loading-spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Click feedback cho tất cả Button component */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* =========================================================
+   Navigation / Button loading feedback
+   ========================================================= */
+
+.button-loading-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Immediate click feedback */
+button:not(:disabled):active,
+a:not([aria-disabled="true"]):active {
+  transform: scale(0.97);
+}
+

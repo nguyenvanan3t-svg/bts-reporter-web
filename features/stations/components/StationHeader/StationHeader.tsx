@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NavigationLink from "@/components/ui/NavigationLink";
 
 type StationHeaderProps = {
     stationCode: string;
@@ -337,8 +338,9 @@ export default function StationHeader({
                         {isCompleted ? "COMPLETE" : "PENDING"}
                     </span>
 
-                    <Link
+                    <NavigationLink
                         href={`/projects/${projectId}`}
+                        loadingText="Opening..."
                         style={{
                             display: "inline-flex",
                             alignItems: "center",
@@ -366,7 +368,7 @@ export default function StationHeader({
                             ←
                         </span>
                         Back to Project
-                    </Link>
+                    </NavigationLink>
                 </div>
             </div>
             </div>
