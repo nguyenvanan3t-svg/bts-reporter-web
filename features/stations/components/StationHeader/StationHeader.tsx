@@ -1,4 +1,3 @@
-import Link from "next/link";
 import NavigationLink from "@/components/ui/NavigationLink";
 
 type StationHeaderProps = {
@@ -155,39 +154,42 @@ export default function StationHeader({
                     color: "#2563eb",
                 }}
             >
-                <Link
+                <NavigationLink
                     href="/"
+                    loadingText="Opening..."
                     style={{
                         color: "#2563eb",
                         textDecoration: "none",
                     }}
                 >
                     Home
-                </Link>
+                </NavigationLink>
 
                 <span style={{ color: "#64748b" }}>&gt;</span>
 
-                <Link
+                <NavigationLink
                     href="/projects"
+                    loadingText="Opening..."
                     style={{
                         color: "#2563eb",
                         textDecoration: "none",
                     }}
                 >
                     Projects
-                </Link>
+                </NavigationLink>
 
                 <span style={{ color: "#64748b" }}>&gt;</span>
 
-                <Link
+                <NavigationLink
                     href={`/projects/${projectId}`}
+                    loadingText="Opening..."
                     style={{
                         color: "#2563eb",
                         textDecoration: "none",
                     }}
                 >
                     {projectName}
-                </Link>
+                </NavigationLink>
 
                 <span style={{ color: "#64748b" }}>&gt;</span>
 

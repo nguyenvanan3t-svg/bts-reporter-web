@@ -1,5 +1,4 @@
 import type { Project } from "../../types";
-import Link from "next/link";
 import NavigationLink from "@/components/ui/NavigationLink";
 
 interface ProjectHeaderProps {
@@ -257,21 +256,29 @@ export default function ProjectHeader({
                             color: "#2563eb",
                         }}
                     >
-                        <Link
+                        <NavigationLink
                             href="/"
-                            className="hover:text-blue-700"
+                            loadingText="Opening..."
+                            style={{
+                                color: "#2563eb",
+                                textDecoration: "none",
+                            }}
                         >
                             Home
-                        </Link>
+                        </NavigationLink>
 
                         <span>&gt;</span>
 
-                        <Link
+                        <NavigationLink
                             href="/projects"
-                            className="hover:text-blue-700"
+                            loadingText="Opening..."
+                            style={{
+                                color: "#2563eb",
+                                textDecoration: "none",
+                            }}
                         >
                             Projects
-                        </Link>
+                        </NavigationLink>
 
                         <span>&gt;</span>
 
