@@ -356,3 +356,39 @@ a:not([aria-disabled="true"]):active {
   transform: scale(0.97);
 }
 
+/* =========================================================
+   Project Layout - Mobile
+   Mobile:
+   Project Information
+   Province Progress
+   Progress
+   Station List
+
+   Desktop / iPad giữ nguyên layout hiện tại.
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+  .project-layout-center,
+  .project-layout-center-content {
+    display: contents;
+  }
+
+  .project-layout-left {
+    order: 1;
+  }
+
+  .project-layout-province-progress {
+    order: 2;
+  }
+
+  .project-layout-right {
+    order: 3;
+  }
+
+  .project-layout-station-list {
+    order: 4;
+  }
+
+}
+

@@ -704,14 +704,17 @@ export default function ProjectFtpDashboard({
                     </Card>
                 }
                 center={
-                    <div className="space-y-3">
-                        <ProvinceProgress
-                            stations={stations}
-                            ftpResults={scanResults}
-                            ftpScanned={hasScanned}
-                        />
+                    <div className="project-layout-center-content space-y-3">
+                        <div className="project-layout-province-progress">
+                            <ProvinceProgress
+                                stations={stations}
+                                ftpResults={scanResults}
+                                ftpScanned={hasScanned}
+                            />
+                        </div>
 
                         <div
+                            className="project-layout-station-list"
                             style={{
                                 marginTop: 12,
                                 padding: 12,
